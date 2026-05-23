@@ -1,313 +1,130 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pure Alpha 動態對沖策略控制台</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --bull-color: #22c55e;
-            --bull-bg: rgba(34, 197, 94, 0.1);
-            --bear-color: #ef4444;
-            --bear-bg: rgba(239, 68, 68, 0.1);
-            --border-color: #334155;
-            --accent: #3b82f6;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .dashboard {
-            width: 100%;
-            max-width: 800px;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            color: var(--text-main);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 15px;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 600px) {
-            .grid-2 { grid-template-columns: 1fr; }
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border-color);
-        }
-
-        .card h2 {
-            margin-top: 0;
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-        }
-
-        .metric {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            font-size: 1.1rem;
-        }
-
-        .metric span.value {
-            font-weight: bold;
-            font-size: 1.3rem;
-        }
-
-        /* 狀態指示器 */
-        .status-box {
-            text-align: center;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-top: 10px;
-            transition: all 0.3s ease;
-        }
-        .status-bull { color: var(--bull-color); background-color: var(--bull-bg); border: 1px solid var(--bull-color); }
-        .status-bear { color: var(--bear-color); background-color: var(--bear-bg); border: 1px solid var(--bear-color); }
-        .status-loading { color: var(--text-muted); background-color: var(--border-color); }
-
-        /* 表格樣式 */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-        th { color: var(--text-muted); font-weight: normal; }
-        td.target-weight { font-weight: bold; color: var(--accent); text-align: right;}
-
-        /* 控制項 */
-        .controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            background: #0f172a;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        input[type="number"] {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            color: white;
-            padding: 8px;
-            border-radius: 4px;
-            width: 100px;
-        }
-        button {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 9px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover { background: #2563eb; }
-        
-        .loading-text { font-size: 0.9rem; color: var(--text-muted); margin-top: 10px; text-align: center; }
-
-    </style>
-</head>
-<body>
-
-<div class="dashboard">
-    <h1>Pure Alpha 戰情中心</h1>
-
-    <div class="grid-2">
-        <div class="card">
-            <h2>濾網狀態 (QQQ vs MA200)</h2>
-            <div class="metric">
-                <span>QQQ 現價</span>
-                <span class="value" id="display-price">讀取中...</span>
-            </div>
-            <div class="metric">
-                <span>200日均線 (MA200)</span>
-                <span class="value" id="display-ma200">讀取中...</span>
-            </div>
-            <div class="metric">
-                <span>強弱比值 (Ratio)</span>
-                <span class="value" id="display-ratio">--</span>
-            </div>
-            <div id="strategy-status" class="status-box status-loading">
-                資料同步中...
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>系統控制 (手動覆寫)</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top:0;">當 API 失效或欲進行回測模擬時，可手動輸入數值。</p>
-            <div class="controls">
-                <label>QQQ:</label>
-                <input type="number" id="manual-price" step="0.01">
-            </div>
-            <div class="controls">
-                <label>MA200:</label>
-                <input type="number" id="manual-ma200" step="0.01">
-            </div>
-            <button onclick="applyManualOverride()">套用手動數值</button>
-            <div id="api-log" class="loading-text">正在嘗試連線至 Yahoo Finance API...</div>
-        </div>
-    </div>
-
-    <div class="card">
-        <h2>當前目標部位配置 (Target Allocation)</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>資產代碼</th>
-                    <th>策略角色</th>
-                    <th style="text-align: right;">目標權重</th>
-                </tr>
-            </thead>
-            <tbody id="allocation-table">
-                </tbody>
-        </table>
-    </div>
-</div>
-
 <script>
-    // 策略設定 (根據你的最新 CSV 資料微調)
-    const bullAllocation = [
-        { asset: 'QQQ (00662)', role: '核心成長', target: '29.57%' },
-        { asset: 'QLD (00670L)', role: '動能放大', target: '36.40%' },
-        { asset: 'TLT (00679B)', role: '避險資產', target: '7.50%' },
-        { asset: 'GLD (00635U)', role: '避險資產', target: '7.50%' },
-        { asset: 'SGOV (00859B)', role: '短債緩衝', target: '11.25%' },
-        { asset: 'UUP', role: '美元避險', target: '7.78%' }
-    ];
 
-    const bearAllocation = [
-        { asset: 'QQQ (00662)', role: '核心成長', target: '20.00%' },
-        { asset: 'QLD (00670L)', role: '動能清零 (避險)', target: '0.00%' },
-        { asset: 'TLT (00679B)', role: '避險資產', target: '15.00%' },
-        { asset: 'GLD (00635U)', role: '避險資產', target: '15.00%' },
-        { asset: 'SGOV (00859B)', role: '冬眠資金池', target: '40.00%' },
-        { asset: 'UUP', role: '美元避險', target: '10.00%' }
-    ];
+async function fetchMarketData() {
 
-    // 更新畫面邏輯
-    function updateDashboardUI(price, ma200) {
-        const ratio = (price / ma200).toFixed(4);
-        const isBull = price > ma200;
+  try {
 
-        // 更新文字
-        document.getElementById('display-price').innerText = price.toFixed(2);
-        document.getElementById('display-ma200').innerText = ma200.toFixed(2);
-        document.getElementById('display-ratio').innerText = ratio;
-        
-        // 更新狀態框
-        const statusBox = document.getElementById('strategy-status');
-        if (isBull) {
-            statusBox.className = 'status-box status-bull';
-            statusBox.innerText = '牛市進攻模式 (Bull)';
-        } else {
-            statusBox.className = 'status-box status-bear';
-            statusBox.innerText = '熊市防禦模式 (Bear)';
-        }
+    const symbols = ['QQQ', '^VIX'];
 
-        // 更新表格
-        const tableBody = document.getElementById('allocation-table');
-        tableBody.innerHTML = '';
-        const targetData = isBull ? bullAllocation : bearAllocation;
-        
-        targetData.forEach(row => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${row.asset}</strong></td>
-                <td>${row.role}</td>
-                <td class="target-weight">${row.target}</td>
-            `;
-            tableBody.appendChild(tr);
-        });
+    const results = await Promise.all(
+
+      symbols.map(async (symbol) => {
+
+        const targetUrl = encodeURIComponent(
+          `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`
+        );
+
+        const url =
+          `https://api.allorigins.win/raw?url=${targetUrl}`;
+
+        const response = await fetch(url);
+
+        const data = await response.json();
+
+        const result = data.chart.result[0];
+
+        const closes =
+          result.indicators.quote[0].close.filter(v => v !== null);
+
+        const current = closes[closes.length - 1];
+
+        const ma200 =
+          closes.slice(-200).reduce((a,b)=>a+b,0)/200;
+
+        return {
+          symbol,
+          current,
+          ma200
+        };
+
+      })
+
+    );
+
+    const qqq =
+      results.find(r => r.symbol === 'QQQ');
+
+    const vix =
+      results.find(r => r.symbol === '^VIX');
+
+    // ===== 更新 QQQ =====
+
+    document.getElementById('qqq-price').innerText =
+      qqq.current.toFixed(2);
+
+    document.getElementById('qqq-ma200').innerText =
+      qqq.ma200.toFixed(2);
+
+    const bull = qqq.current > qqq.ma200;
+
+    document.getElementById('qqq-status').innerText =
+      bull ? 'Above MA200' : 'Below MA200';
+
+    document.getElementById('qqq-status').className =
+      bull ? 'value green' : 'value red';
+
+    document.getElementById('market-regime').innerText =
+      bull ? 'Bull Market' : 'Bear Market';
+
+    document.getElementById('market-regime').className =
+      bull ? 'signal bull' : 'signal bear';
+
+    // ===== 更新 VIX =====
+
+    document.getElementById('vix-value').innerText =
+      vix.current.toFixed(2);
+
+    // ===== 動態配置 =====
+
+    let qldWeight = 20;
+    let sgovWeight = 15;
+
+    if (!bull) {
+
+      qldWeight = 5;
+      sgovWeight = 35;
+
     }
 
-    // 手動覆寫功能
-    function applyManualOverride() {
-        const manualPrice = parseFloat(document.getElementById('manual-price').value);
-        const manualMa200 = parseFloat(document.getElementById('manual-ma200').value);
-        
-        if (!manualPrice || !manualMa200) {
-            alert('請輸入完整的 QQQ 與 MA200 數值');
-            return;
-        }
-        
-        document.getElementById('api-log').innerText = "✅ 已切換為手動覆寫模式";
-        document.getElementById('api-log').style.color = "var(--bull-color)";
-        updateDashboardUI(manualPrice, manualMa200);
+    if (vix.current > 30) {
+
+      qldWeight = 0;
+      sgovWeight = 45;
+
     }
 
-    // 自動抓取 API 邏輯
-    async function fetchYahooData() {
-        const log = document.getElementById('api-log');
-        try {
-            // 使用 allorigins 作為中繼，加上時間戳防止快取
-            const targetUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/QQQ?interval=1d&range=1y';
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}&t=${Date.now()}`;
-            
-            const response = await fetch(proxyUrl);
-            if (!response.ok) throw new Error('API 回應異常');
-            
-            const data = await response.json();
-            const closes = data.chart.result[0].indicators.quote[0].close.filter(v => v !== null);
-            
-            const currentPrice = closes[closes.length - 1];
-            const period = 200;
-            const ma200 = closes.slice(-period).reduce((a, b) => a + b, 0) / period;
+    document.getElementById('qld-weight').innerText =
+      qldWeight + '%';
 
-            // 將抓到的值填入手動框 (方便使用者微調)
-            document.getElementById('manual-price').value = currentPrice.toFixed(2);
-            document.getElementById('manual-ma200').value = ma200.toFixed(2);
+    document.getElementById('sgov-weight').innerText =
+      sgovWeight + '%';
 
-            log.innerText = "✅ API 同步成功 (最新收盤價)";
-            log.style.color = "var(--bull-color)";
-            
-            updateDashboardUI(currentPrice, ma200);
+    // ===== 更新時間 =====
 
-        } catch (error) {
-            console.error(error);
-            log.innerText = "⚠️ API 連線失敗，請使用上方手動輸入";
-            log.style.color = "var(--bear-color)";
-            document.getElementById('strategy-status').innerText = "等待資料...";
-            document.getElementById('strategy-status').className = "status-box status-loading";
-        }
-    }
+    document.getElementById('update-time').innerText =
+      new Date().toLocaleString();
 
-    // 啟動程式
-    fetchYahooData();
+  }
+
+  catch(error) {
+
+    console.log(error);
+
+    document.getElementById('qqq-status').innerText =
+      'API Error';
+
+    document.getElementById('market-regime').innerText =
+      'API Error';
+
+    document.getElementById('vix-value').innerText =
+      'API Error';
+
+  }
+
+}
+
+fetchMarketData();
+
+setInterval(fetchMarketData, 1800000);
+
 </script>
-</body>
-</html>
