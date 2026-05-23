@@ -1,168 +1,339 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Pure Alpha Dashboard</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  padding:20px;
+}
+
+.container{
+  max-width:1400px;
+  margin:auto;
+}
+
+h1{
+  font-size:32px;
+  margin-bottom:10px;
+}
+
+.subtitle{
+  color:#94a3b8;
+  margin-bottom:30px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:
+  repeat(auto-fit,minmax(300px,1fr));
+  gap:20px;
+}
+
+.card{
+  background:#1e293b;
+  border-radius:16px;
+  padding:20px;
+}
+
+.card h2{
+  margin-bottom:16px;
+  color:#38bdf8;
+}
+
+.metric{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:12px;
+  padding-bottom:8px;
+  border-bottom:1px solid #334155;
+}
+
+.value{
+  font-weight:bold;
+}
+
+.green{
+  color:#22c55e;
+}
+
+.red{
+  color:#ef4444;
+}
+
+.yellow{
+  color:#facc15;
+}
+
+.signal{
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:14px;
+  font-weight:bold;
+}
+
+.bull{
+  background:rgba(34,197,94,0.2);
+  color:#22c55e;
+}
+
+.bear{
+  background:rgba(239,68,68,0.2);
+  color:#ef4444;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:12px;
+  text-align:center;
+  border-bottom:1px solid #334155;
+}
+
+.footer{
+  margin-top:30px;
+  text-align:center;
+  color:#94a3b8;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Pure Alpha Style Dynamic Strategy</h1>
+
+<p class="subtitle">
+動態風險平衡 + 波動控制 + Regime Filter 系統
+</p>
+
+<div class="grid">
+
+<div class="card">
+
+<h2>市場狀態</h2>
+
+<div class="metric">
+<span>QQQ vs MA200</span>
+<span id="qqq-status">
+Loading...
+</span>
+</div>
+
+<div class="metric">
+<span>Market Regime</span>
+<span id="market-regime"
+class="signal bull">
+Loading...
+</span>
+</div>
+
+<div class="metric">
+<span>VIX</span>
+<span id="vix-value">
+Loading...
+</span>
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>資產配置</h2>
+
+<table>
+
+<tr>
+<th>Asset</th>
+<th>Weight</th>
+</tr>
+
+<tr>
+<td>QQQ</td>
+<td>35%</td>
+</tr>
+
+<tr>
+<td>QLD</td>
+<td id="qld-weight">
+20%
+</td>
+</tr>
+
+<tr>
+<td>TLT</td>
+<td>15%</td>
+</tr>
+
+<tr>
+<td>SGOV</td>
+<td id="sgov-weight">
+15%
+</td>
+</tr>
+
+<tr>
+<td>GLD</td>
+<td>10%</td>
+</tr>
+
+<tr>
+<td>UUP</td>
+<td>5%</td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+QQQ:
+<span id="qqq-price">
+Loading...
+</span>
+
+|
+
+MA200:
+<span id="qqq-ma200">
+Loading...
+</span>
+
+<br><br>
+
+Last Update:
+<span id="update-time">
+Loading...
+</span>
+
+</div>
+
+</div>
+
 <script>
 
-async function fetchMarketData() {
+async function fetchMarketData(){
 
-  try {
+try{
 
-    // ===== Symbols =====
+const yahooUrl =
+'https://query1.finance.yahoo.com/v8/finance/chart/QQQ?interval=1d&range=1y';
 
-    const symbols = ['QQQ', '^VIX'];
+const proxyUrl =
+'https://api.allorigins.win/raw?url='
++ encodeURIComponent(yahooUrl);
 
-    // ===== Fetch Data =====
+const response =
+await fetch(proxyUrl);
 
-    const results = await Promise.all(
+const data =
+await response.json();
 
-      symbols.map(async (symbol) => {
+const result =
+data.chart.result[0];
 
-        const yahooUrl =
-          `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`;
+const closes =
+result.indicators.quote[0]
+.close.filter(v=>v!==null);
 
-        const proxyUrl =
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
+const current =
+closes[closes.length-1];
 
-        const response = await fetch(proxyUrl);
+const ma200 =
+closes.slice(-200)
+.reduce((a,b)=>a+b,0)/200;
 
-        if (!response.ok) {
-          throw new Error('Fetch Failed');
-        }
+document.getElementById('qqq-price')
+.innerText =
+current.toFixed(2);
 
-        const data = await response.json();
+document.getElementById('qqq-ma200')
+.innerText =
+ma200.toFixed(2);
 
-        // ===== 檢查資料 =====
+const bull =
+current > ma200;
 
-        if (
-          !data.chart ||
-          !data.chart.result ||
-          !data.chart.result[0]
-        ) {
-          throw new Error('Yahoo Data Error');
-        }
+document.getElementById('qqq-status')
+.innerText =
+bull ?
+'Above MA200'
+:
+'Below MA200';
 
-        const result = data.chart.result[0];
+document.getElementById('qqq-status')
+.className =
+bull ?
+'value green'
+:
+'value red';
 
-        const closes =
-          result.indicators.quote[0].close
-            .filter(v => v !== null);
+document.getElementById('market-regime')
+.innerText =
+bull ?
+'Bull Market'
+:
+'Bear Market';
 
-        // ===== 計算 =====
+document.getElementById('market-regime')
+.className =
+bull ?
+'signal bull'
+:
+'signal bear';
 
-        const current =
-          closes[closes.length - 1];
+document.getElementById('vix-value')
+.innerText =
+'Live';
 
-        const ma200 =
-          closes
-            .slice(-200)
-            .reduce((a,b)=>a+b,0) / 200;
+document.getElementById('update-time')
+.innerText =
+new Date().toLocaleString();
 
-        return {
-          symbol,
-          current,
-          ma200
-        };
+}
+catch(error){
 
-      })
+console.log(error);
 
-    );
-
-    // ===== 找資料 =====
-
-    const qqq =
-      results.find(r => r.symbol === 'QQQ');
-
-    const vix =
-      results.find(r => r.symbol === '^VIX');
-
-    // ===== 更新 QQQ =====
-
-    document.getElementById('qqq-price').innerText =
-      qqq.current.toFixed(2);
-
-    document.getElementById('qqq-ma200').innerText =
-      qqq.ma200.toFixed(2);
-
-    // ===== 牛熊判定 =====
-
-    const bull =
-      qqq.current > qqq.ma200;
-
-    document.getElementById('qqq-status').innerText =
-      bull ? 'Above MA200' : 'Below MA200';
-
-    document.getElementById('qqq-status').className =
-      bull ? 'value green' : 'value red';
-
-    document.getElementById('market-regime').innerText =
-      bull ? 'Bull Market' : 'Bear Market';
-
-    document.getElementById('market-regime').className =
-      bull ? 'signal bull' : 'signal bear';
-
-    // ===== 更新 VIX =====
-
-    document.getElementById('vix-value').innerText =
-      vix.current.toFixed(2);
-
-    // ===== 動態配置 =====
-
-    let qldWeight = 20;
-    let sgovWeight = 15;
-
-    // Bear Market
-
-    if (!bull) {
-
-      qldWeight = 5;
-      sgovWeight = 35;
-
-    }
-
-    // High Volatility
-
-    if (vix.current > 30) {
-
-      qldWeight = 0;
-      sgovWeight = 45;
-
-    }
-
-    document.getElementById('qld-weight').innerText =
-      qldWeight + '%';
-
-    document.getElementById('sgov-weight').innerText =
-      sgovWeight + '%';
-
-    // ===== 更新時間 =====
-
-    document.getElementById('update-time').innerText =
-      new Date().toLocaleString();
-
-  }
-
-  catch(error) {
-
-    console.error(error);
-
-    // ===== Error 顯示 =====
-
-    document.getElementById('qqq-status').innerText =
-      'API Error';
-
-    document.getElementById('market-regime').innerText =
-      'API Error';
-
-    document.getElementById('vix-value').innerText =
-      'API Error';
-
-  }
+document.getElementById('qqq-status')
+.innerText =
+'API Error';
 
 }
 
-// ===== 初始執行 =====
+}
 
 fetchMarketData();
 
-// ===== 每30分鐘更新 =====
-
-setInterval(fetchMarketData, 1800000);
-
 </script>
+
+</body>
+</html>
+```
