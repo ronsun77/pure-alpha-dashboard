@@ -121,14 +121,14 @@ Waiting...
 
 <script>
 
-const API_KEY = 'HCILAYEW4Y64TM3P';
+const API_KEY = 'b286e5ff15bc4cf8a2eb07d873e3ed3a';
 
 async function loadData(){
 
 try{
 
 const url =
-`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=QQQ&outputsize=full&apikey=${API_KEY}`;
+`https://api.twelvedata.com/time_series?symbol=QQQ&interval=1day&outputsize=250&apikey=${API_KEY}`;
 
 const response =
 await fetch(url);
@@ -138,12 +138,9 @@ await response.json();
 
 document.getElementById('debug-box')
 .innerText =
-JSON.stringify(data).slice(0,500);
+JSON.stringify(data).slice(0,400);
 
-const ts =
-data["Time Series (Daily)"];
-
-if(!ts){
+if(!data.values){
 
 document.getElementById('market-status')
 .innerText =
@@ -157,12 +154,9 @@ return;
 
 }
 
-const dates =
-Object.keys(ts);
-
 const closes =
-dates.map(
-d => parseFloat(ts[d]["4. close"])
+data.values.map(
+v => parseFloat(v.close)
 );
 
 const current =
@@ -171,7 +165,7 @@ closes[0];
 const ma200 =
 closes.slice(0,200)
 .reduce((a,b)=>a+b,0)
-/ closes.slice(0,200).length;
+/ 200;
 
 document.getElementById('qqq-price')
 .innerText =
