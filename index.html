@@ -210,7 +210,7 @@
             </tr>
             <tr>
               <td>TLT</td>
-              <td id="sgov-weight">15%</td>
+              <td>15%</td>
             </tr>
             <tr>
               <td>GLD</td>
@@ -218,7 +218,7 @@
             </tr>
             <tr>
               <td>SGOV</td>
-              <td>15%</td>
+              <td id="sgov-weight">15%</td>
             </tr>
             <tr>
               <td>UUP</td>
@@ -305,79 +305,105 @@
     </div>
   </div>
   <script>
-    async function fetchMarketData() {
-      try {
-        // 使用免費 Yahoo Finance API Proxy
-        const symbols = ['QQQ', 'SPY', '^VIX'];
 
-        const results = await Promise.all(
-          symbols.map(async (symbol) => {
-            const url = `https://api.allorigins.win/raw?url=https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`;
-            const response = await fetch(url);
-            const data = await response.json();
+async function fetchMarketData() {
 
-            const result = data.chart.result[0];
-            const closes = result.indicators.quote[0].close.filter(v => v !== null);
-            const current = closes[closes.length - 1];
+  try {
 
-            const ma200 = closes.slice(-200).reduce((a,b)=>a+b,0)/200;
+    const symbols = ['QQQ', '^VIX'];
 
-            return {
-              symbol,
-              current,
-              ma200
-            };
-          })
+    const results = await Promise.all(
+
+      symbols.map(async (symbol) => {
+
+        const targetUrl = encodeURIComponent(
+          `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`
         );
 
-        const qqq = results.find(r => r.symbol === 'QQQ');
-        const spy = results.find(r => r.symbol === 'SPY');
-        const vix = results.find(r => r.symbol === '^VIX');
+        const url = `https://api.allorigins.win/raw?url=${targetUrl}`;
 
-        // 更新畫面
-        document.getElementById('qqq-price').innerText = qqq.current.toFixed(2);
-        document.getElementById('qqq-ma200').innerText = qqq.ma200.toFixed(2);
+        const response = await fetch(url);
 
-        const bull = qqq.current > qqq.ma200;
+        const data = await response.json();
 
-        document.getElementById('market-regime').innerText = bull ? 'Bull Market' : 'Bear Market';
-        document.getElementById('market-regime').className = bull ? 'signal bull' : 'signal bear';
+        const result = data.chart.result[0];
 
-        document.getElementById('qqq-status').innerText = bull ? 'Above MA200' : 'Below MA200';
-        document.getElementById('qqq-status').className = bull ? 'value green' : 'value red';
+        const closes = result.indicators.quote[0].close.filter(v => v !== null);
 
-        document.getElementById('vix-value').innerText = vix.current.toFixed(2);
+        const current = closes[closes.length - 1];
 
-        // 動態配置建議
-        let qldWeight = 20;
-        let sgovWeight = 15;
+        const ma200 = closes.slice(-200).reduce((a,b)=>a+b,0)/200;
 
-        if (!bull) {
-          qldWeight = 5;
-          sgovWeight = 35;
-        }
+        return {
+          symbol,
+          current,
+          ma200
+        };
 
-        if (vix.current > 30) {
-          qldWeight = 0;
-          sgovWeight = 45;
-        }
+      })
 
-        document.getElementById('qld-weight').innerText = qldWeight + '%';
-        document.getElementById('sgov-weight').innerText = sgovWeight + '%';
+    );
 
-        // 更新時間
-        const now = new Date();
-        document.getElementById('update-time').innerText = now.toLocaleString();
+    const qqq = results.find(r => r.symbol === 'QQQ');
 
-      } catch (error) {
-        console.error('Data fetch error:', error);
-      }
+    const vix = results.find(r => r.symbol === '^VIX');
+
+    document.getElementById('qqq-price').innerText = qqq.current.toFixed(2);
+
+    document.getElementById('qqq-ma200').innerText = qqq.ma200.toFixed(2);
+
+    const bull = qqq.current > qqq.ma200;
+
+    document.getElementById('qqq-status').innerText = bull ? 'Above MA200' : 'Below MA200';
+
+    document.getElementById('qqq-status').className = bull ? 'value green' : 'value red';
+
+    document.getElementById('market-regime').innerText = bull ? 'Bull Market' : 'Bear Market';
+
+    document.getElementById('market-regime').className = bull ? 'signal bull' : 'signal bear';
+
+    document.getElementById('vix-value').innerText = vix.current.toFixed(2);
+
+    let qldWeight = 20;
+    let sgovWeight = 15;
+
+    if (!bull) {
+      qldWeight = 5;
+      sgovWeight = 35;
     }
 
-    fetchMarketData();
+    if (vix.current > 30) {
+      qldWeight = 0;
+      sgovWeight = 45;
+    }
 
-    // 每30分鐘更新一次
-    setInterval(fetchMarketData, 1800000);
-  </script>
+    document.getElementById('qld-weight').innerText = qldWeight + '%';
+
+    document.getElementById('sgov-weight').innerText = sgovWeight + '%';
+
+    document.getElementById('update-time').innerText = new Date().toLocaleString();
+
+  }
+
+  catch(error) {
+
+    console.log(error);
+
+    document.getElementById('qqq-status').innerText = 'API Error';
+
+    document.getElementById('market-regime').innerText = 'API Error';
+
+    document.getElementById('vix-value').innerText = 'API Error';
+
+  }
+
+}
+
+fetchMarketData();
+
+setInterval(fetchMarketData, 1800000);
+
+</script>
 </body>
 </html>
+
