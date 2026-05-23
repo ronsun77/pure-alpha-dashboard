@@ -128,7 +128,7 @@ async function loadData(){
 try{
 
 const url =
-`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=QQQ&outputsize=compact&apikey=${API_KEY}`;
+`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=QQQ&outputsize=full&apikey=${API_KEY}`;
 
 const response =
 await fetch(url);
@@ -170,7 +170,8 @@ closes[0];
 
 const ma200 =
 closes.slice(0,200)
-.reduce((a,b)=>a+b,0)/200;
+.reduce((a,b)=>a+b,0)
+/ closes.slice(0,200).length;
 
 document.getElementById('qqq-price')
 .innerText =
