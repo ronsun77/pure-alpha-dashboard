@@ -107,7 +107,7 @@ Loading...
 
 <script>
 
-const API_KEY = 'HCILAYEW4Y64TM3P';
+const API_KEY = 'demo';
 
 async function loadData(){
 
@@ -125,14 +125,6 @@ await response.json();
 const ts =
 data["Time Series (Daily)"];
 
-if(!ts){
-
-console.log(data);
-
-throw new Error('API Data Error');
-
-}
-  
 const dates =
 Object.keys(ts);
 
