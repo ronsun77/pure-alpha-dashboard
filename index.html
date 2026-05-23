@@ -1,243 +1,261 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pure Alpha 7.0 雙基地動態戰情室</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+    body { background: #0f172a; color: #e2e8f0; padding: 25px; }
+    .container { max-width: 1400px; margin: auto; }
+    
+    /* 頁首 */
+    header { border-bottom: 2px solid #334155; padding-bottom: 15px; margin-bottom: 25px; }
+    h1 { font-size: 30px; color: #f8fafc; font-weight: 700; }
+    .subtitle { color: #38bdf8; font-size: 14px; margin-top: 5px; letter-spacing: 1px; }
 
-<meta charset="UTF-8">
+    /* 頂部數據看板 */
+    .metrics-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .metric-card { background: #1e293b; border-radius: 12px; padding: 15px; border: 1px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+    .metric-card label { display: block; color: #94a3b8; font-size: 12px; text-transform: uppercase; margin-bottom: 5px; }
+    .metric-card .value { font-size: 22px; font-weight: bold; color: #f8fafc; }
+    
+    /* 狀態燈號 */
+    .status-badge { inline-size: 100%; text-align: center; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 16px; margin-top: 5px; }
+    .bull-bg { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid #22c55e; }
+    .warn-bg { background: rgba(250,204,21,0.15); color: #facc15; border: 1px solid #facc15; }
+    .bear-bg { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid #ef4444; }
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+    /* 主要版面佈局 */
+    .main-grid { display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
+    @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
 
-<title>Pure Alpha Dashboard</title>
+    /* 控制面板 */
+    .control-panel { background: #1e293b; border-radius: 16px; padding: 20px; border: 1px solid #334155; height: fit-content; }
+    .control-panel h2 { font-size: 18px; color: #38bdf8; margin-bottom: 20px; }
+    .slider-group { margin-bottom: 20px; }
+    .slider-group label { display: flex; justify-content: space-between; color: #cbd5e1; font-size: 14px; margin-bottom: 8px; }
+    .slider-group label span.val-display { font-weight: bold; color: #38bdf8; }
+    input[type="range"] { width: 100%; accent-color: #38bdf8; cursor: pointer; }
 
-<style>
+    /* 決策看板 */
+    .display-panel { background: #1e293b; border-radius: 16px; padding: 20px; border: 1px solid #334155; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .display-panel h2 { font-size: 18px; color: #38bdf8; margin-bottom: 15px; }
 
-body{
-  background:#0f172a;
-  color:white;
-  font-family:Arial,sans-serif;
-  padding:30px;
-}
+    /* 表格設計 */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #334155; }
+    th { background: #24334d; color: #cbd5e1; font-size: 14px; font-weight: 600; }
+    td { font-size: 15px; }
+    tr:hover { background: rgba(255,255,255,0.02); }
+    
+    .asset-name { font-weight: bold; color: #fff; }
+    .role-tag { font-size: 12px; color: #94a3b8; background: #0f172a; padding: 2px 6px; border-radius: 4px; }
+    
+    /* 交易行動顏色 */
+    .act-tag { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 13px; text-align: center; display: inline-block; min-width: 65px; }
+    .act-buy { background: rgba(34,197,94,0.2); color: #22c55e; }
+    .act-sell { background: rgba(239,68,68,0.2); color: #ef4444; }
+    .act-hold { background: rgba(148,163,184,0.15); color: #94a3b8; }
 
-h1{
-  margin-bottom:20px;
-}
-
-.card{
-  background:#1e293b;
-  padding:25px;
-  border-radius:16px;
-  max-width:700px;
-}
-
-.metric{
-  margin-bottom:18px;
-  font-size:18px;
-}
-
-.green{
-  color:#22c55e;
-  font-weight:bold;
-}
-
-.red{
-  color:#ef4444;
-  font-weight:bold;
-}
-
-.yellow{
-  color:#facc15;
-  font-weight:bold;
-}
-
-.small{
-  font-size:12px;
-  color:#94a3b8;
-  margin-top:20px;
-  word-break:break-all;
-}
-
-</style>
-
+    .footer { text-align: center; margin-top: 30px; color: #64748b; font-size: 12px; }
+  </style>
 </head>
-
 <body>
 
-<h1>Pure Alpha Dashboard</h1>
+  <div class="container">
+    <header>
+      <h1>Pure Alpha Style Dynamic Strategy</h1>
+      <div class="subtitle">六資產全時動態平衡系統 (V7.0 專業版)</div>
+    </header>
 
-<div class="card">
+    <div class="metrics-bar">
+      <div class="metric-card">
+        <label>策略運作模式</label>
+        <div id="regime-badge" class="status-badge bull-bg">核心進攻模式</div>
+      </div>
+      <div class="metric-card">
+        <label>斷頭台防線 (MA200 × 0.97)</label>
+        <div class="value" id="mdd-line">594.34</div>
+      </div>
+      <div class="metric-card">
+        <label>組合年化波動率 (Volatility)</label>
+        <div class="value" style="color: #38bdf8;">15.82%</div>
+      </div>
+      <div class="metric-card">
+        <label>投資組合 Rolling Beta</label>
+        <div class="value" style="color: #facc15;">1.08</div>
+      </div>
+    </div>
 
-<div class="metric">
-QQQ Price:
-<span id="qqq-price">
-Loading...
-</span>
-</div>
+    <div class="main-grid">
+      
+      <div class="control-panel">
+        <h2>系統環境參數模擬</h2>
+        
+        <div class="slider-group">
+          <label>QQQ 目前模擬價格: <span class="val-display" id="lbl-qqq">717.54</span></label>
+          <input type="range" id="slider-qqq" min="500" max="850" step="0.01" value="717.54" oninput="calculateCore()">
+        </div>
 
-<div class="metric">
-MA200:
-<span id="qqq-ma200">
-Loading...
-</span>
-</div>
+        <div class="slider-group">
+          <label>MA200 基準線: <span class="val-display" id="lbl-ma200">612.72</span></label>
+          <input type="range" id="slider-ma200" min="550" max="650" step="0.01" value="612.72" oninput="calculateCore()">
+        </div>
 
-<div class="metric">
-Market Status:
-<span id="market-status">
-Loading...
-</span>
-</div>
+        <div class="slider-group">
+          <label>當前動態 K 值: <span class="val-display" id="lbl-k">1.137</span></label>
+          <input type="range" id="slider-k" min="0.500" max="1.500" step="0.001" value="1.137" oninput="calculateCore()">
+        </div>
 
-<div class="metric">
-Suggested QLD Weight:
-<span id="qld-weight">
-Loading...
-</span>
-</div>
+        <div class="slider-group">
+          <label>換倉最小調整門檻: <span class="val-display" id="lbl-threshold">2.0%</span></label>
+          <input type="range" id="slider-threshold" min="0.5" max="5.0" step="0.1" value="2.0" oninput="calculateCore()">
+        </div>
+      </div>
 
-<div class="metric">
-Suggested SGOV Weight:
-<span id="sgov-weight">
-Loading...
-</span>
-</div>
+      <div class="display-panel">
+        <h2>六大資產動態配置與交易決策明細表</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>資產代碼</th>
+              <th>策略戰術角色</th>
+              <th>目前實倉 (%)</th>
+              <th>目標權重 (%)</th>
+              <th>權重落差 (Diff)</th>
+              <th>執行指令 (Action)</th>
+            </tr>
+          </thead>
+          <tbody id="trade-table-body">
+            </tbody>
+        </table>
+      </div>
 
-<div class="metric">
-Last Update:
-<span id="update-time">
-Loading...
-</span>
-</div>
+    </div>
 
-<div class="small">
-API Debug:
-<div id="debug-box">
-Waiting...
-</div>
-</div>
+    <div class="footer">
+      Pure Alpha Portfolio Management Console v7.0 | Risk Parity & Momentum Regime Filter
+    </div>
+  </div>
 
-</div>
+  <script>
+    // 嚴格鎖定使用者 CSV 試算表中的最新實際部位持倉 (Current Weights)
+    const currentWeights = {
+      QQQ: 28.71,
+      QLD: 35.66,
+      TLT: 7.80,
+      GLD: 7.65,
+      UUP: 8.00,
+      SGOV: 12.18
+    };
 
-<script>
+    // 基礎基地權重 (Base Weights)
+    const bullBase = { QQQ: 26.0, QLD: 32.0, TLT: 7.0, GLD: 7.0, UUP: 9.0 };
+    const bearBase = { QQQ: 13.8, QLD: 0.0,  TLT: 9.9, GLD: 10.1, UUP: 24.5 };
 
-const API_KEY = 'b286e5ff15bc4cf8a2eb07d873e3ed3a';
+    function calculateCore() {
+      // 讀取滑桿數值
+      const qqq = parseFloat(document.getElementById('slider-qqq').value);
+      const ma200 = parseFloat(document.getElementById('slider-ma200').value);
+      const k = parseFloat(document.getElementById('slider-k').value);
+      const threshold = parseFloat(document.getElementById('slider-threshold').value);
 
-async function loadData(){
+      // 更新介面滑桿數字顯示
+      document.getElementById('lbl-qqq').innerText = qqq.toFixed(2);
+      document.getElementById('lbl-ma200').innerText = ma200.toFixed(2);
+      document.getElementById('lbl-k').innerText = k.toFixed(3);
+      document.getElementById('lbl-threshold').innerText = threshold.toFixed(1) + '%';
 
-try{
+      // 計算 0.97 斷頭台防線
+      const cutoffLine = ma200 * 0.97;
+      document.getElementById('mdd-line').innerText = cutoffLine.toFixed(2);
 
-const url =
-`https://api.twelvedata.com/time_series?symbol=QQQ&interval=1day&outputsize=250&apikey=${API_KEY}`;
+      // 判定市場狀態與 Regime
+      const badge = document.getElementById('regime-badge');
+      let isBull = true;
+      
+      if (qqq >= ma200) {
+        badge.className = "status-badge bull-bg";
+        badge.innerText = "牛市核心進攻";
+        isBull = true;
+      } else if (qqq < ma200 && qqq >= cutoffLine) {
+        badge.className = "status-badge warn-bg";
+        badge.innerText = "多頭破位警戒區";
+        isBull = true; // 尚未跌破 0.97 緩衝，維持原 K 值控盤機制
+      } else {
+        badge.className = "status-badge bear-bg";
+        badge.innerText = "熊市全面防禦 (冬眠啟動)";
+        isBull = false; // 跌破 0.97 斷頭台，徹底切換為熊市 Base，QLD 強制歸零
+      }
 
-const response =
-await fetch(url);
+      // 選擇對應的 Base 權重
+      const base = isBull ? bullBase : bearBase;
+      let targets = {};
 
-const data =
-await response.json();
+      // 核心 5 大資產严格遵守：Base * K值 縮放邏輯
+      targets.QQQ = base.QQQ * k;
+      targets.QLD = isBull ? (base.QLD * k) : 0.0; // 熊市時 QLD 強制清倉歸零
+      targets.TLT = base.TLT * k;
+      targets.GLD = base.GLD * k;
+      targets.UUP = base.UUP * k;
 
-document.getElementById('debug-box')
-.innerText =
-'API Connected Successfully';
+      // SGOV 扮演絕對海綿角色：完美吸納剩餘所有資金 (100% - 其他五項總和)
+      const allocatedSum = targets.QQQ + targets.QLD + targets.TLT + targets.GLD + targets.UUP;
+      targets.SGOV = Math.max(0, 100.0 - allocatedSum);
 
-if(!data.values){
+      // 渲染表格
+      const tbody = document.getElementById('trade-table-body');
+      tbody.innerHTML = '';
 
-throw new Error('No values data');
+      const assetList = ['QQQ', 'QLD', 'TLT', 'GLD', 'UUP', 'SGOV'];
+      const roles = {
+        QQQ: '核心成長引擎',
+        QLD: '動能槓桿放大',
+        TLT: '長債負相關避險',
+        GLD: '抗通膨終極防禦',
+        UUP: '美元流動性避險',
+        SGOV: '流動性緩衝 / 剩餘資金池'
+      };
 
-}
+      assetList.forEach(asset => {
+        const cur = currentWeights[asset];
+        const tgt = targets[asset];
+        const diff = tgt - cur;
+        
+        // 判定交易訊號
+        let actionText = 'HOLD';
+        let actionClass = 'act-tag act-hold';
+        
+        if (diff >= threshold) {
+          actionText = 'BUY';
+          actionClass = 'act-tag act-buy';
+        } else if (diff <= -threshold) {
+          actionText = 'SELL';
+          actionClass = 'act-tag act-sell';
+        }
+        
+        // 特殊規則：當進入熊市且 QLD 還留有倉位時，強制標示強平訊號
+        if (!isBull && asset === 'QLD' && cur > 0) {
+          actionText = 'CRITICAL SELL';
+          actionClass = 'act-tag act-sell';
+        }
 
-const closes =
-data.values
-.map(v => parseFloat(v.close))
-.filter(v => !isNaN(v));
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span class="asset-name">${asset}</span></td>
+          <td><span class="role-tag">${roles[asset]}</span></td>
+          <td style="font-family: monospace;">${cur.toFixed(2)}%</td>
+          <td style="font-family: monospace; font-weight: bold; color: #f8fafc;">${tgt.toFixed(2)}%</td>
+          <td style="font-family: monospace; color: ${diff >= 0 ? '#22c55e' : '#ef4444'}">${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%</td>
+          <td><span class="${actionClass}">${actionText}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
-if(closes.length < 200){
-
-throw new Error('Not enough MA200 data');
-
-}
-
-const current =
-closes[0];
-
-const ma200Array =
-closes.slice(0,200);
-
-const ma200 =
-ma200Array.reduce((a,b)=>a+b,0)
-/
-ma200Array.length;
-
-document.getElementById('qqq-price')
-.innerText =
-current.toFixed(2);
-
-document.getElementById('qqq-ma200')
-.innerText =
-ma200.toFixed(2);
-
-const bull =
-current > ma200;
-
-document.getElementById('market-status')
-.innerText =
-bull ?
-'Bull Market'
-:
-'Bear Market';
-
-document.getElementById('market-status')
-.className =
-bull ?
-'green'
-:
-'red';
-
-const qld =
-bull ? 20 : 5;
-
-const sgov =
-bull ? 15 : 35;
-
-document.getElementById('qld-weight')
-.innerText =
-qld + '%';
-
-document.getElementById('sgov-weight')
-.innerText =
-sgov + '%';
-
-document.getElementById('update-time')
-.innerText =
-new Date().toLocaleString();
-
-}
-
-catch(error){
-
-console.log(error);
-
-document.getElementById('market-status')
-.innerText =
-'ERROR';
-
-document.getElementById('market-status')
-.className =
-'red';
-
-document.getElementById('debug-box')
-.innerText =
-error;
-
-}
-
-}
-
-loadData();
-
-setInterval(loadData,1800000);
-
-</script>
-
+    // 網頁開啟時自動執行第一次運算
+    calculateCore();
+  </script>
 </body>
-
 </html>
