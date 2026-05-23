@@ -312,7 +312,7 @@
 
         const results = await Promise.all(
           symbols.map(async (symbol) => {
-            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`;
+            const url = `https://api.allorigins.win/raw?url=https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`;
             const response = await fetch(url);
             const data = await response.json();
 
