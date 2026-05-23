@@ -125,6 +125,14 @@ await response.json();
 const ts =
 data["Time Series (Daily)"];
 
+if(!ts){
+
+console.log(data);
+
+throw new Error('API Data Error');
+
+}
+  
 const dates =
 Object.keys(ts);
 
