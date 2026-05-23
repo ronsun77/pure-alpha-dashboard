@@ -1,174 +1,213 @@
+```html id="euq0ga"
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pure Alpha Style Dynamic Strategy</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    body { background: #0f172a; color: #e2e8f0; padding: 20px; }
-    .container { max-width: 1400px; margin: auto; }
-    h1 { font-size: 32px; margin-bottom: 10px; color: #f8fafc; }
-    .subtitle { color: #94a3b8; margin-bottom: 30px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-    .card { background: #1e293b; border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .card h2 { margin-bottom: 16px; font-size: 22px; color: #38bdf8; }
-    .metric { display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #334155; }
-    .metric:last-child { border-bottom: none; }
-    .label { color: #cbd5e1; }
-    .value { font-weight: bold; color: #f8fafc; }
-    .green { color: #22c55e; }
-    .red { color: #ef4444; }
-    .yellow { color: #facc15; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { padding: 12px; text-align: center; border-bottom: 1px solid #334155; }
-    th { background: #334155; color: #f8fafc; }
-    .signal { display: inline-block; padding: 6px 12px; border-radius: 999px; font-size: 14px; font-weight: bold; }
-    .bull { background: rgba(34,197,94,0.2); color: #22c55e; }
-    .bear { background: rgba(239,68,68,0.2); color: #ef4444; }
-    .neutral { background: rgba(250,204,21,0.2); color: #facc15; }
-    .footer { margin-top: 30px; color: #94a3b8; text-align: center; font-size: 14px; }
-  </style>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Pure Alpha Dashboard</title>
+
+<style>
+
+body{
+  background:#0f172a;
+  color:white;
+  font-family:Arial;
+  padding:30px;
+}
+
+h1{
+  margin-bottom:20px;
+}
+
+.card{
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+  max-width:600px;
+}
+
+.metric{
+  margin-bottom:15px;
+  font-size:18px;
+}
+
+.green{
+  color:#22c55e;
+  font-weight:bold;
+}
+
+.red{
+  color:#ef4444;
+  font-weight:bold;
+}
+
+.yellow{
+  color:#facc15;
+  font-weight:bold;
+}
+
+</style>
+
 </head>
+
 <body>
-  <div class="container">
-    <h1>Pure Alpha Style Dynamic Strategy</h1>
-    <p class="subtitle">動態風險平衡 + 波動控制 + Regime Filter 系統</p>
 
-    <div class="grid">
+<h1>Pure Alpha Dashboard</h1>
 
-      <div class="card">
-        <h2>市場狀態 (即時同步)</h2>
+<div class="card">
 
-        <div class="metric">
-          <span class="label">QQQ vs MA200</span>
-          <span class="value" id="qqq-ma-status">讀取中...</span>
-        </div>
+<div class="metric">
+QQQ Price:
+<span id="qqq-price">
+Loading...
+</span>
+</div>
 
-        <div class="metric">
-          <span class="label">Market Regime</span>
-          <span class="signal neutral" id="market-regime">讀取中...</span>
-        </div>
+<div class="metric">
+MA200:
+<span id="qqq-ma200">
+Loading...
+</span>
+</div>
 
-        <div class="metric">
-          <span class="label">SPX Drawdown (252日)</span>
-          <span class="value" id="spx-dd">讀取中...</span>
-        </div>
+<div class="metric">
+Market Status:
+<span id="market-status">
+Loading...
+</span>
+</div>
 
-        <div class="metric">
-          <span class="label">VIX</span>
-          <span class="value" id="vix-val">讀取中...</span>
-        </div>
-      </div>
+<div class="metric">
+Suggested QLD Weight:
+<span id="qld-weight">
+Loading...
+</span>
+</div>
 
-      <div class="card">
-        <h2>Portfolio Risk</h2>
-        <div class="metric"><span class="label">Portfolio Volatility</span><span class="value">15.8%</span></div>
-        <div class="metric"><span class="label">Rolling Beta</span><span class="value">0.82</span></div>
-        <div class="metric"><span class="label">Max Drawdown</span><span class="value red">-24.5%</span></div>
-        <div class="metric"><span class="label">Target Beta Range</span><span class="value">0.65 ~ 0.95</span></div>
-      </div>
+<div class="metric">
+Suggested SGOV Weight:
+<span id="sgov-weight">
+Loading...
+</span>
+</div>
 
-      <div class="card">
-        <h2>資產配置</h2>
-        <table>
-          <thead><tr><th>Asset</th><th>Weight</th></tr></thead>
-          <tbody>
-            <tr><td>QQQ</td><td>35%</td></tr>
-            <tr><td>QLD</td><td>20%</td></tr>
-            <tr><td>TLT</td><td>15%</td></tr>
-            <tr><td>GLD</td><td>10%</td></tr>
-            <tr><td>SGOV</td><td>15%</td></tr>
-            <tr><td>UUP</td><td>5%</td></tr>
-          </tbody>
-        </table>
-      </div>
+<div class="metric">
+Last Update:
+<span id="update-time">
+Loading...
+</span>
+</div>
 
-      <div class="card">
-        <h2>動態規則</h2>
-        <div class="metric"><span class="label">QQQ &lt; MA200 × 0.97</span><span class="value red">Reduce QLD</span></div>
-        <div class="metric"><span class="label">SPX -10%</span><span class="value green">+5% QLD</span></div>
-        <div class="metric"><span class="label">SPX -19%</span><span class="value green">+10% QLD</span></div>
-        <div class="metric"><span class="label">SPX -30%</span><span class="value green">+15% QLD</span></div>
-      </div>
+</div>
 
-      <div class="card">
-        <h2>避險判定</h2>
-        <div class="metric"><span class="label">TLT 強勢</span><span class="value">經濟衰退</span></div>
-        <div class="metric"><span class="label">UUP 強勢</span><span class="value">流動性危機</span></div>
-        <div class="metric"><span class="label">GLD 強勢</span><span class="value">通膨風險</span></div>
-      </div>
+<script>
 
-      <div class="card">
-        <h2>策略目標</h2>
-        <div class="metric"><span class="label">Target CAGR</span><span class="value green">13~18%</span></div>
-        <div class="metric"><span class="label">Target Volatility</span><span class="value">14~20%</span></div>
-        <div class="metric"><span class="label">Target Max DD</span><span class="value red">&lt; -35%</span></div>
-        <div class="metric"><span class="label">Weekly Review</span><span class="value">Every Sunday</span></div>
-      </div>
+const API_KEY = 'HCILAYEW4Y64TM3P';
 
-    </div>
+async function loadData(){
 
-    <div class="footer">
-      Pure Alpha Style Dynamic Strategy Dashboard | Weekly Tactical Allocation System
-    </div>
-  </div>
+try{
 
-  <script>
-    // 建立一個通用的抓價函數 (使用 Proxy 繞過 CORS)
-    async function fetchYahooData(ticker) {
-      const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1y`;
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${Date.now()}`;
-      const response = await fetch(proxyUrl);
-      const data = await response.json();
-      return data.chart.result[0].indicators.quote[0].close.filter(v => v !== null);
-    }
+const url =
+`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=QQQ&outputsize=full&apikey=${API_KEY}`;
 
-    async function updateDashboard() {
-      try {
-        // 1. 抓取 QQQ 判斷 MA200 與 Regime
-        const qqqCloses = await fetchYahooData('QQQ');
-        const qqqCurrent = qqqCloses[qqqCloses.length - 1];
-        const qqqMa200 = qqqCloses.slice(-200).reduce((a, b) => a + b, 0) / 200;
-        const isBull = qqqCurrent > qqqMa200;
+const response =
+await fetch(url);
 
-        const maStatusEl = document.getElementById('qqq-ma-status');
-        const regimeEl = document.getElementById('market-regime');
-        
-        maStatusEl.innerText = isBull ? 'Above MA200' : 'Below MA200';
-        maStatusEl.className = isBull ? 'value green' : 'value red';
-        
-        regimeEl.innerText = isBull ? 'Bull Market' : 'Bear Market';
-        regimeEl.className = isBull ? 'signal bull' : 'signal bear';
+const data =
+await response.json();
 
-        // 2. 抓取 SPX 判斷 Drawdown
-        const spxCloses = await fetchYahooData('%5EGSPC'); // ^GSPC 是標普500代碼
-        const spxCurrent = spxCloses[spxCloses.length - 1];
-        const spxMax = Math.max(...spxCloses);
-        const spxDrawdown = ((spxCurrent - spxMax) / spxMax) * 100;
-        
-        const ddEl = document.getElementById('spx-dd');
-        ddEl.innerText = spxDrawdown.toFixed(2) + '%';
-        ddEl.className = spxDrawdown < -10 ? 'value red' : 'value yellow';
+const ts =
+data["Time Series (Daily)"];
 
-        // 3. 抓取 VIX
-        const vixCloses = await fetchYahooData('%5EVIX');
-        const vixCurrent = vixCloses[vixCloses.length - 1];
-        
-        const vixEl = document.getElementById('vix-val');
-        vixEl.innerText = vixCurrent.toFixed(2);
-        if(vixCurrent > 25) vixEl.className = 'value red';
-        else if (vixCurrent > 18) vixEl.className = 'value yellow';
-        else vixEl.className = 'value green';
+const dates =
+Object.keys(ts);
 
-      } catch (error) {
-        console.error("API 抓取失敗", error);
-        document.getElementById('qqq-ma-status').innerText = "連線失敗";
-      }
-    }
+const closes =
+dates.map(
+d => parseFloat(ts[d]["4. close"])
+);
 
-    // 啟動更新
-    updateDashboard();
-  </script>
+const current =
+closes[0];
+
+const ma200 =
+closes.slice(0,200)
+.reduce((a,b)=>a+b,0)/200;
+
+document.getElementById('qqq-price')
+.innerText =
+current.toFixed(2);
+
+document.getElementById('qqq-ma200')
+.innerText =
+ma200.toFixed(2);
+
+const bull =
+current > ma200;
+
+document.getElementById('market-status')
+.innerText =
+bull ?
+'Bull Market'
+:
+'Bear Market';
+
+document.getElementById('market-status')
+.className =
+bull ?
+'green'
+:
+'red';
+
+let qld =
+bull ? 20 : 5;
+
+let sgov =
+bull ? 15 : 35;
+
+document.getElementById('qld-weight')
+.innerText =
+qld + '%';
+
+document.getElementById('sgov-weight')
+.innerText =
+sgov + '%';
+
+document.getElementById('update-time')
+.innerText =
+new Date().toLocaleString();
+
+}
+
+catch(error){
+
+console.log(error);
+
+document.getElementById('market-status')
+.innerText =
+'API Error';
+
+document.getElementById('market-status')
+.className =
+'red';
+
+}
+
+}
+
+loadData();
+
+setInterval(loadData,1800000);
+
+</script>
+
 </body>
+
 </html>
+```
