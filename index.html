@@ -1,146 +1,73 @@
-```html
 <!DOCTYPE html>
 <html lang="zh-Hant">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Pure Alpha Dashboard</title>
-
-<style>
-
-body{
-  background:#0f172a;
-  color:white;
-  font-family:Arial;
-  padding:30px;
-}
-
-.card{
-  background:#1e293b;
-  padding:20px;
-  border-radius:12px;
-  max-width:500px;
-}
-
-.green{
-  color:#22c55e;
-}
-
-.red{
-  color:#ef4444;
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pure Alpha Dashboard</title>
+    <style>
+        body { background: #0f172a; color: white; font-family: Arial, sans-serif; padding: 30px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; max-width: 500px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .green { color: #22c55e; font-weight: bold; }
+        .red { color: #ef4444; font-weight: bold; }
+        .data-row { margin-bottom: 10px; font-size: 1.1em; }
+    </style>
 </head>
-
 <body>
 
-<h1>Pure Alpha Dashboard</h1>
+    <h1>Pure Alpha Dashboard</h1>
 
-<div class="card">
+    <div class="card">
+        <h2>QQQ 趨勢濾網狀態</h2>
+        <div class="data-row">
+            QQQ 目前價格: <span id="qqq-price">Loading...</span>
+        </div>
+        <div class="data-row">
+            MA200 均線: <span id="qqq-ma200">Loading...</span>
+        </div>
+        <div class="data-row">
+            當前策略狀態: <span id="qqq-status">Loading...</span>
+        </div>
+    </div>
 
-<h2>QQQ Market Status</h2>
+    <script>
+        async function run() {
+            try {
+                // 原本的 Yahoo API 網址
+                const targetUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/QQQ?interval=1d&range=1y';
+                
+                // 透過 allorigins 中繼站繞過 CORS 限制
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
 
-<p>
-QQQ Price:
-<span id="qqq-price">
-Loading...
-</span>
-</p>
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                
+                const result = data.chart.result[0];
+                const closes = result.indicators.quote[0].close.filter(v => v !== null);
+                
+                // 取得最新價格
+                const current = closes[closes.length - 1];
+                
+                // 計算 200 日均線 (確保資料量超過 200 天)
+                const period = 200;
+                const ma200 = closes.slice(-period).reduce((a, b) => a + b, 0) / period;
 
-<p>
-MA200:
-<span id="qqq-ma200">
-Loading...
-</span>
-</p>
+                document.getElementById('qqq-price').innerText = current.toFixed(2);
+                document.getElementById('qqq-ma200').innerText = ma200.toFixed(2);
 
-<p>
-Status:
-<span id="qqq-status">
-Loading...
-</span>
-</p>
+                const isBull = current > ma200;
+                
+                const statusElement = document.getElementById('qqq-status');
+                statusElement.innerText = isBull ? '牛市進攻模式 (Bull Market)' : '熊市防禦模式 (Bear Market)';
+                statusElement.className = isBull ? 'green' : 'red';
 
-</div>
+            } catch (error) {
+                console.log(error);
+                document.getElementById('qqq-status').innerText = 'API 讀取失敗';
+                document.getElementById('qqq-status').className = 'red';
+            }
+        }
 
-<script>
-
-async function run(){
-
-try{
-
-const url =
-'https://query1.finance.yahoo.com/v8/finance/chart/QQQ?interval=1d&range=1y';
-
-const response =
-await fetch(url);
-
-const data =
-await response.json();
-
-const result =
-data.chart.result[0];
-
-const closes =
-result.indicators.quote[0]
-.close.filter(v=>v!==null);
-
-const current =
-closes[closes.length-1];
-
-const ma200 =
-closes.slice(-200)
-.reduce((a,b)=>a+b,0)/200;
-
-document.getElementById('qqq-price')
-.innerText =
-current.toFixed(2);
-
-document.getElementById('qqq-ma200')
-.innerText =
-ma200.toFixed(2);
-
-const bull =
-current > ma200;
-
-document.getElementById('qqq-status')
-.innerText =
-bull ?
-'Bull Market'
-:
-'Bear Market';
-
-document.getElementById('qqq-status')
-.className =
-bull ?
-'green'
-:
-'red';
-
-}
-
-catch(error){
-
-console.log(error);
-
-document.getElementById('qqq-status')
-.innerText =
-'API Error';
-
-}
-
-}
-
-run();
-
-</script>
-
+        run();
+    </script>
 </body>
-
 </html>
-```
