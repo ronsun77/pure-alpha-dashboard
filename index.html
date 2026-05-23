@@ -5,70 +5,24 @@
 <head>
 
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Pure Alpha Dashboard</title>
 
 <style>
 
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:Arial,sans-serif;
-}
-
 body{
   background:#0f172a;
-  color:#e2e8f0;
-  padding:20px;
-}
-
-.container{
-  max-width:1400px;
-  margin:auto;
-}
-
-h1{
-  font-size:32px;
-  margin-bottom:10px;
-}
-
-.subtitle{
-  color:#94a3b8;
-  margin-bottom:30px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:
-  repeat(auto-fit,minmax(300px,1fr));
-  gap:20px;
+  color:white;
+  font-family:Arial;
+  padding:30px;
 }
 
 .card{
   background:#1e293b;
-  border-radius:16px;
   padding:20px;
-}
-
-.card h2{
-  margin-bottom:16px;
-  color:#38bdf8;
-}
-
-.metric{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:12px;
-  padding-bottom:8px;
-  border-bottom:1px solid #334155;
-}
-
-.value{
-  font-weight:bold;
+  border-radius:12px;
+  max-width:500px;
 }
 
 .green{
@@ -79,179 +33,52 @@ h1{
   color:#ef4444;
 }
 
-.yellow{
-  color:#facc15;
-}
-
-.signal{
-  padding:6px 12px;
-  border-radius:999px;
-  font-size:14px;
-  font-weight:bold;
-}
-
-.bull{
-  background:rgba(34,197,94,0.2);
-  color:#22c55e;
-}
-
-.bear{
-  background:rgba(239,68,68,0.2);
-  color:#ef4444;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th,td{
-  padding:12px;
-  text-align:center;
-  border-bottom:1px solid #334155;
-}
-
-.footer{
-  margin-top:30px;
-  text-align:center;
-  color:#94a3b8;
-}
-
 </style>
 
 </head>
 
 <body>
 
-<div class="container">
-
-<h1>Pure Alpha Style Dynamic Strategy</h1>
-
-<p class="subtitle">
-動態風險平衡 + 波動控制 + Regime Filter 系統
-</p>
-
-<div class="grid">
+<h1>Pure Alpha Dashboard</h1>
 
 <div class="card">
 
-<h2>市場狀態</h2>
+<h2>QQQ Market Status</h2>
 
-<div class="metric">
-<span>QQQ vs MA200</span>
-<span id="qqq-status">
-Loading...
-</span>
-</div>
-
-<div class="metric">
-<span>Market Regime</span>
-<span id="market-regime"
-class="signal bull">
-Loading...
-</span>
-</div>
-
-<div class="metric">
-<span>VIX</span>
-<span id="vix-value">
-Loading...
-</span>
-</div>
-
-</div>
-
-<div class="card">
-
-<h2>資產配置</h2>
-
-<table>
-
-<tr>
-<th>Asset</th>
-<th>Weight</th>
-</tr>
-
-<tr>
-<td>QQQ</td>
-<td>35%</td>
-</tr>
-
-<tr>
-<td>QLD</td>
-<td id="qld-weight">
-20%
-</td>
-</tr>
-
-<tr>
-<td>TLT</td>
-<td>15%</td>
-</tr>
-
-<tr>
-<td>SGOV</td>
-<td id="sgov-weight">
-15%
-</td>
-</tr>
-
-<tr>
-<td>GLD</td>
-<td>10%</td>
-</tr>
-
-<tr>
-<td>UUP</td>
-<td>5%</td>
-</tr>
-
-</table>
-
-</div>
-
-</div>
-
-<div class="footer">
-
-QQQ:
+<p>
+QQQ Price:
 <span id="qqq-price">
 Loading...
 </span>
+</p>
 
-|
-
+<p>
 MA200:
 <span id="qqq-ma200">
 Loading...
 </span>
+</p>
 
-<br><br>
-
-Last Update:
-<span id="update-time">
+<p>
+Status:
+<span id="qqq-status">
 Loading...
 </span>
-
-</div>
+</p>
 
 </div>
 
 <script>
 
-async function fetchMarketData(){
+async function run(){
 
 try{
 
-const yahooUrl =
+const url =
 'https://query1.finance.yahoo.com/v8/finance/chart/QQQ?interval=1d&range=1y';
 
-const proxyUrl =
-'https://api.allorigins.win/raw?url='
-+ encodeURIComponent(yahooUrl);
-
 const response =
-await fetch(proxyUrl);
+await fetch(url);
 
 const data =
 await response.json();
@@ -284,40 +111,19 @@ current > ma200;
 document.getElementById('qqq-status')
 .innerText =
 bull ?
-'Above MA200'
-:
-'Below MA200';
-
-document.getElementById('qqq-status')
-.className =
-bull ?
-'value green'
-:
-'value red';
-
-document.getElementById('market-regime')
-.innerText =
-bull ?
 'Bull Market'
 :
 'Bear Market';
 
-document.getElementById('market-regime')
+document.getElementById('qqq-status')
 .className =
 bull ?
-'signal bull'
+'green'
 :
-'signal bear';
-
-document.getElementById('vix-value')
-.innerText =
-'Live';
-
-document.getElementById('update-time')
-.innerText =
-new Date().toLocaleString();
+'red';
 
 }
+
 catch(error){
 
 console.log(error);
@@ -330,10 +136,11 @@ document.getElementById('qqq-status')
 
 }
 
-fetchMarketData();
+run();
 
 </script>
 
 </body>
+
 </html>
 ```
