@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="zh-Hant">
 
@@ -138,34 +137,35 @@ await response.json();
 
 document.getElementById('debug-box')
 .innerText =
-JSON.stringify(data).slice(0,400);
+JSON.stringify(data).slice(0,300);
 
 if(!data.values){
 
-document.getElementById('market-status')
-.innerText =
-'API Data Error';
-
-document.getElementById('market-status')
-.className =
-'red';
-
-return;
+throw new Error('No values data');
 
 }
 
 const closes =
-data.values.map(
-v => parseFloat(v.close)
-);
+data.values
+.map(v => parseFloat(v.close))
+.filter(v => !isNaN(v));
+
+if(closes.length < 200){
+
+throw new Error('Not enough MA200 data');
+
+}
 
 const current =
 closes[0];
 
+const ma200Array =
+closes.slice(0,200);
+
 const ma200 =
-closes.slice(0,200)
-.reduce((a,b)=>a+b,0)
-/ 200;
+ma200Array.reduce((a,b)=>a+b,0)
+/
+ma200Array.length;
 
 document.getElementById('qqq-price')
 .innerText =
@@ -218,7 +218,7 @@ console.log(error);
 
 document.getElementById('market-status')
 .innerText =
-'Fetch Error';
+'ERROR';
 
 document.getElementById('market-status')
 .className =
@@ -241,4 +241,3 @@ setInterval(loadData,1800000);
 </body>
 
 </html>
-```
