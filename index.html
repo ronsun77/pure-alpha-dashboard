@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Pure Alpha 戰情室 V4</title>
+<title>Pure Alpha 戰情室 V5</title>
 
 <style>
 
@@ -17,18 +16,18 @@
 }
 
 body{
-  background:#0f172a;
+  background:#081028;
   color:#e2e8f0;
   padding:20px;
 }
 
 .container{
-  max-width:1700px;
+  max-width:1800px;
   margin:auto;
 }
 
 h1{
-  font-size:42px;
+  font-size:48px;
   margin-bottom:10px;
   color:white;
 }
@@ -40,15 +39,15 @@ h1{
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(450px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
   gap:20px;
 }
 
 .card{
-  background:#1e293b;
-  border-radius:18px;
+  background:#17233a;
+  border-radius:20px;
   padding:24px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.35);
+  box-shadow:0 4px 25px rgba(0,0,0,0.35);
 }
 
 .card h2{
@@ -104,7 +103,7 @@ th{
 }
 
 select{
-  background:#0f172a;
+  background:#081028;
   color:white;
   border:1px solid #334155;
   padding:8px 12px;
@@ -138,6 +137,14 @@ select{
   color:#94a3b8;
 }
 
+.risk-on{
+  color:#22c55e;
+}
+
+.risk-off{
+  color:#ef4444;
+}
+
 </style>
 </head>
 
@@ -145,10 +152,10 @@ select{
 
 <div class="container">
 
-<h1>Pure Alpha 戰情室 V4</h1>
+<h1>Pure Alpha 戰情室 V5</h1>
 
 <div class="subtitle">
-Regime Engine × Dynamic Allocation × Rolling Beta × Tactical Overlay
+Portfolio Risk Engine × Dynamic Allocation × Rolling Beta × Tactical Overlay
 </div>
 
 <div class="grid">
@@ -262,6 +269,62 @@ Benchmark：
 
 </div>
 
+<!-- Portfolio Risk -->
+<div class="card">
+
+<h2>Portfolio Risk Engine</h2>
+
+<div class="metric">
+<span class="label">Portfolio Volatility</span>
+<span id="portfolio-vol" class="value">Loading...</span>
+</div>
+
+<div class="metric">
+<span class="label">Portfolio Beta</span>
+<span id="portfolio-beta" class="value">Loading...</span>
+</div>
+
+<div class="metric">
+<span class="label">Risk Status</span>
+<span id="risk-status" class="value">Loading...</span>
+</div>
+
+<div class="metric">
+<span class="label">Max Drawdown</span>
+<span id="max-dd" class="value red">-35%</span>
+</div>
+
+</div>
+
+<!-- Risk Contribution -->
+<div class="card">
+
+<h2>Risk Contribution</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>資產</th>
+<th>風險貢獻</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr><td>QQQ</td><td id="rc-qqq">-</td></tr>
+<tr><td>QLD</td><td id="rc-qld">-</td></tr>
+<tr><td>TLT</td><td id="rc-tlt">-</td></tr>
+<tr><td>GLD</td><td id="rc-gld">-</td></tr>
+<tr><td>UUP</td><td id="rc-uup">-</td></tr>
+<tr><td>SGOV</td><td id="rc-sgov">-</td></tr>
+
+</tbody>
+
+</table>
+
+</div>
+
 <!-- Overlay -->
 <div class="card">
 
@@ -269,22 +332,22 @@ Benchmark：
 
 <div class="metric">
 <span class="label">QQQ &lt; MA200 × 0.97</span>
-<span id="overlay-1" class="value red">Waiting...</span>
+<span id="overlay-1" class="value">Inactive</span>
 </div>
 
 <div class="metric">
 <span class="label">SPY 回撤 -10%</span>
-<span id="overlay-2" class="value">Waiting...</span>
+<span id="overlay-2" class="value">Inactive</span>
 </div>
 
 <div class="metric">
 <span class="label">SPY 回撤 -19%</span>
-<span id="overlay-3" class="value">Waiting...</span>
+<span id="overlay-3" class="value">Inactive</span>
 </div>
 
 <div class="metric">
 <span class="label">SPY 回撤 -30%</span>
-<span id="overlay-4" class="value">Waiting...</span>
+<span id="overlay-4" class="value">Inactive</span>
 </div>
 
 </div>
@@ -292,7 +355,7 @@ Benchmark：
 </div>
 
 <div class="footer">
-Pure Alpha 多資產戰情室 V4
+Pure Alpha Multi-Asset Risk Operating System V5
 </div>
 
 </div>
@@ -301,338 +364,378 @@ Pure Alpha 多資產戰情室 V4
 
 const API_KEY = "b286e5ff15bc4cf8a2eb07d873e3ed3a";
 
-const assets = ["QLD","TLT","GLD","UUP","SGOV"];
+const assets = ["QQQ","QLD","TLT","GLD","UUP","SGOV"];
 
 let benchmark = "QQQ";
 let windowSize = 21;
 
+let currentAllocation = {};
+
 const bullBase = {
-  QQQ:26,
-  QLD:32,
-  TLT:7,
-  GLD:7,
-  UUP:9,
-  SGOV:19
+QQQ:26,
+QLD:32,
+TLT:7,
+GLD:7,
+UUP:9,
+SGOV:19
 };
 
 const bearBase = {
-  QQQ:20,
-  QLD:20,
-  TLT:10,
-  GLD:10,
-  UUP:20,
-  SGOV:20
+QQQ:20,
+QLD:20,
+TLT:10,
+GLD:10,
+UUP:20,
+SGOV:20
 };
 
 async function fetchPrices(symbol){
 
-  const url =
-  `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=220&apikey=${API_KEY}`;
+const url =
+`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=220&apikey=${API_KEY}`;
 
-  const response = await fetch(url);
+const response = await fetch(url);
 
-  const data = await response.json();
+const data = await response.json();
 
-  console.log(symbol,data);
+if(!data.values){
+return [];
+}
 
-  if(!data.values){
-
-    return [];
-
-  }
-
-  return data.values
-    .map(v => parseFloat(v.close))
-    .reverse();
+return data.values
+.map(v => parseFloat(v.close))
+.reverse();
 
 }
 
 function calcReturns(prices){
 
-  let arr = [];
+let arr = [];
 
-  for(let i=1;i<prices.length;i++){
+for(let i=1;i<prices.length;i++){
 
-    arr.push(
-      (prices[i]-prices[i-1]) / prices[i-1]
-    );
+arr.push(
+(prices[i]-prices[i-1])/prices[i-1]
+);
 
-  }
+}
 
-  return arr;
+return arr;
 
 }
 
 function mean(arr){
+return arr.reduce((a,b)=>a+b,0)/arr.length;
+}
 
-  return arr.reduce((a,b)=>a+b,0)/arr.length;
+function variance(arr){
+
+const avg = mean(arr);
+
+return mean(
+arr.map(v => Math.pow(v-avg,2))
+);
 
 }
 
 function covariance(a,b){
 
-  const avgA = mean(a);
-  const avgB = mean(b);
+const avgA = mean(a);
+const avgB = mean(b);
 
-  let sum = 0;
+let sum = 0;
 
-  for(let i=0;i<a.length;i++){
+for(let i=0;i<a.length;i++){
 
-    sum +=
-    (a[i]-avgA)*(b[i]-avgB);
-
-  }
-
-  return sum/a.length;
+sum +=
+(a[i]-avgA)*(b[i]-avgB);
 
 }
 
-function variance(arr){
-
-  const avg = mean(arr);
-
-  let sum = 0;
-
-  for(let i=0;i<arr.length;i++){
-
-    sum += Math.pow(arr[i]-avg,2);
-
-  }
-
-  return sum/arr.length;
+return sum/a.length;
 
 }
 
-function calcBeta(assetReturns, benchmarkReturns){
+function calcBeta(asset,benchmark){
 
-  const cov =
-    covariance(assetReturns, benchmarkReturns);
+const cov =
+covariance(asset,benchmark);
 
-  const vari =
-    variance(benchmarkReturns);
+const vari =
+variance(benchmark);
 
-  if(vari === 0){
+if(vari===0){
+return 0;
+}
 
-    return 0;
-
-  }
-
-  const beta = cov / vari;
-
-  if(isNaN(beta) || !isFinite(beta)){
-
-    return 0;
-
-  }
-
-  return beta;
+return cov/vari;
 
 }
 
 async function updateRollingBeta(){
 
-  const benchmarkPrices =
-    await fetchPrices(benchmark);
+const benchmarkPrices =
+await fetchPrices(benchmark);
 
-  const benchmarkReturns =
-    calcReturns(benchmarkPrices);
+const benchmarkReturns =
+calcReturns(benchmarkPrices);
 
-  const rows =
-    document.querySelectorAll("#beta-table tbody tr");
+const rows =
+document.querySelectorAll("#beta-table tbody tr");
 
-  for(let i=0;i<assets.length;i++){
+for(let i=0;i<5;i++){
 
-    const asset = assets[i];
+const asset = assets[i+1];
 
-    const prices =
-      await fetchPrices(asset);
+const prices =
+await fetchPrices(asset);
 
-    const returns =
-      calcReturns(prices);
+const returns =
+calcReturns(prices);
 
-    const minLen =
-      Math.min(
-        returns.length,
-        benchmarkReturns.length,
-        windowSize
-      );
+const minLen =
+Math.min(
+returns.length,
+benchmarkReturns.length,
+windowSize
+);
 
-    const alignedAsset =
-      returns.slice(-minLen);
+const beta =
+calcBeta(
+returns.slice(-minLen),
+benchmarkReturns.slice(-minLen)
+);
 
-    const alignedBenchmark =
-      benchmarkReturns.slice(-minLen);
+rows[i].children[1].innerText =
+beta.toFixed(2);
 
-    const beta =
-      calcBeta(
-        alignedAsset,
-        alignedBenchmark
-      );
-
-    rows[i].children[1].innerText =
-      beta.toFixed(2);
-
-  }
+}
 
 }
 
 async function updateRegime(){
 
-  console.log("updateRegime start");
+const qqqPrices =
+await fetchPrices("QQQ");
 
-  const qqqPrices =
-    await fetchPrices("QQQ");
+const spyPrices =
+await fetchPrices("SPY");
 
-  const spyPrices =
-    await fetchPrices("SPY");
+const qqq =
+qqqPrices[qqqPrices.length-1];
 
-  console.log("QQQ length:",qqqPrices.length);
+const ma200 =
+qqqPrices
+.slice(-200)
+.reduce((a,b)=>a+b,0)/200;
 
-  if(qqqPrices.length === 0){
+const spy =
+spyPrices[spyPrices.length-1];
 
-    return;
+const spyHigh =
+Math.max(...spyPrices);
 
-  }
+const drawdown =
+((spy-spyHigh)/spyHigh)*100;
 
-  const qqq =
-    qqqPrices[qqqPrices.length-1];
+document.getElementById("qqq-price")
+.innerText = qqq.toFixed(2);
 
-  let ma200 = 0;
+document.getElementById("qqq-ma200")
+.innerText = ma200.toFixed(2);
 
-  if(qqqPrices.length >= 200){
+document.getElementById("spy-dd")
+.innerText = drawdown.toFixed(1)+"%";
 
-    ma200 =
-      qqqPrices
-      .slice(-200)
-      .reduce((a,b)=>a+b,0)/200;
+let alloc = {};
 
-  }else{
+if(qqq > ma200){
 
-    ma200 =
-      qqqPrices
-      .reduce((a,b)=>a+b,0)/qqqPrices.length;
+alloc = {...bullBase};
 
-  }
+document.getElementById("market-status")
+.innerText = "Bull Market";
 
-  const spy =
-    spyPrices[spyPrices.length-1];
+document.getElementById("regime-box")
+.className = "regime-box bull-box";
 
-  const spyHigh =
-    Math.max(...spyPrices.filter(v=>!isNaN(v)));
+document.getElementById("regime-box")
+.innerText = "Bull Market";
 
-  const drawdown =
-    ((spy-spyHigh)/spyHigh)*100;
+}else{
 
-  document.getElementById("qqq-price")
-    .innerText = qqq.toFixed(2);
+alloc = {...bearBase};
 
-  document.getElementById("qqq-ma200")
-    .innerText = ma200.toFixed(2);
+document.getElementById("market-status")
+.innerText = "Bear Market";
 
-  document.getElementById("spy-dd")
-    .innerText = drawdown.toFixed(1)+"%";
+document.getElementById("regime-box")
+.className = "regime-box bear-box";
 
-  let regime = "";
-  let regimeClass = "";
+document.getElementById("regime-box")
+.innerText = "Bear Market";
 
-  let alloc = {};
+}
 
-  const qqqBelow97 =
-    qqq < ma200*0.97;
+document.getElementById("overlay-1")
+.innerText = "Inactive";
 
-  const bull =
-    qqq > ma200;
+document.getElementById("overlay-2")
+.innerText = "Inactive";
 
-  if(bull){
+document.getElementById("overlay-3")
+.innerText = "Inactive";
 
-    regime = "Bull Market";
-    regimeClass = "bull-box";
+document.getElementById("overlay-4")
+.innerText = "Inactive";
 
-    alloc = {...bullBase};
+if(qqq < ma200*0.97){
 
-  }else{
+alloc.SGOV += alloc.QLD;
+alloc.QLD = 0;
 
-    regime = "Bear Market";
-    regimeClass = "bear-box";
+document.getElementById("overlay-1")
+.innerText = "Triggered";
 
-    alloc = {...bearBase};
+}
 
-  }
+if(drawdown <= -10){
 
-  if(qqqBelow97){
+alloc.QLD += 5;
+alloc.SGOV -= 5;
 
-    alloc.SGOV += alloc.QLD;
-    alloc.QLD = 0;
+document.getElementById("overlay-2")
+.innerText = "Triggered";
 
-    document.getElementById("overlay-1")
-      .innerText = "Trigger";
+}
 
-  }else{
+if(drawdown <= -19){
 
-    document.getElementById("overlay-1")
-      .innerText = "Inactive";
+alloc.QLD += 10;
+alloc.SGOV -= 10;
 
-  }
+document.getElementById("overlay-3")
+.innerText = "Triggered";
 
-  if(drawdown <= -10){
+}
 
-    alloc.QLD += 5;
-    alloc.SGOV -= 5;
+if(drawdown <= -30){
 
-    document.getElementById("overlay-2")
-      .innerText = "Trigger";
+alloc.QLD += 15;
+alloc.SGOV -= 15;
 
-  }
+document.getElementById("overlay-4")
+.innerText = "Triggered";
 
-  if(drawdown <= -19){
+}
 
-    alloc.QLD += 10;
-    alloc.SGOV -= 10;
+currentAllocation = alloc;
 
-    document.getElementById("overlay-3")
-      .innerText = "Trigger";
+document.getElementById("w-qqq").innerText = alloc.QQQ+"%";
+document.getElementById("w-qld").innerText = alloc.QLD+"%";
+document.getElementById("w-tlt").innerText = alloc.TLT+"%";
+document.getElementById("w-gld").innerText = alloc.GLD+"%";
+document.getElementById("w-uup").innerText = alloc.UUP+"%";
+document.getElementById("w-sgov").innerText = alloc.SGOV+"%";
 
-  }
+}
 
-  if(drawdown <= -30){
+async function updatePortfolioRisk(){
 
-    alloc.QLD += 15;
-    alloc.SGOV -= 15;
+const benchmarkPrices =
+await fetchPrices(benchmark);
 
-    document.getElementById("overlay-4")
-      .innerText = "Trigger";
+const benchmarkReturns =
+calcReturns(benchmarkPrices);
 
-  }
+let portfolioBeta = 0;
+let portfolioVol = 0;
 
-  document.getElementById("w-qqq")
-    .innerText = alloc.QQQ+"%";
+const volData = {};
 
-  document.getElementById("w-qld")
-    .innerText = alloc.QLD+"%";
+for(let asset of assets){
 
-  document.getElementById("w-tlt")
-    .innerText = alloc.TLT+"%";
+const prices =
+await fetchPrices(asset);
 
-  document.getElementById("w-gld")
-    .innerText = alloc.GLD+"%";
+const returns =
+calcReturns(prices);
 
-  document.getElementById("w-uup")
-    .innerText = alloc.UUP+"%";
+const minLen =
+Math.min(
+returns.length,
+benchmarkReturns.length,
+windowSize
+);
 
-  document.getElementById("w-sgov")
-    .innerText = alloc.SGOV+"%";
+const alignedReturns =
+returns.slice(-minLen);
 
-  document.getElementById("market-status")
-    .innerText = regime;
+const alignedBenchmark =
+benchmarkReturns.slice(-minLen);
 
-  const box =
-    document.getElementById("regime-box");
+const beta =
+calcBeta(
+alignedReturns,
+alignedBenchmark
+);
 
-  box.className =
-    "regime-box "+regimeClass;
+const vol =
+Math.sqrt(
+variance(alignedReturns)
+)*Math.sqrt(252);
 
-  box.innerText =
-    regime;
+const weight =
+(currentAllocation[asset]||0)/100;
+
+portfolioBeta +=
+beta * weight;
+
+portfolioVol +=
+vol * weight;
+
+volData[asset] =
+vol * weight;
+
+}
+
+document.getElementById("portfolio-beta")
+.innerText =
+portfolioBeta.toFixed(2);
+
+document.getElementById("portfolio-vol")
+.innerText =
+(portfolioVol*100).toFixed(1)+"%";
+
+if(portfolioBeta > 0.8){
+
+document.getElementById("risk-status")
+.innerHTML =
+'<span class="risk-on">Risk ON</span>';
+
+}else{
+
+document.getElementById("risk-status")
+.innerHTML =
+'<span class="risk-off">Risk OFF</span>';
+
+}
+
+const totalRisk =
+Object.values(volData)
+.reduce((a,b)=>a+b,0);
+
+for(let asset of assets){
+
+const rc =
+(volData[asset]/totalRisk)*100;
+
+document.getElementById(
+"rc-"+asset.toLowerCase()
+).innerText =
+rc.toFixed(1)+"%";
+
+}
 
 }
 
@@ -640,9 +743,10 @@ document
 .getElementById("benchmark-select")
 .addEventListener("change",(e)=>{
 
-  benchmark = e.target.value;
+benchmark = e.target.value;
 
-  updateRollingBeta();
+updateRollingBeta();
+updatePortfolioRisk();
 
 });
 
@@ -650,15 +754,25 @@ document
 .getElementById("window-select")
 .addEventListener("change",(e)=>{
 
-  windowSize =
-    parseInt(e.target.value);
+windowSize =
+parseInt(e.target.value);
 
-  updateRollingBeta();
+updateRollingBeta();
+updatePortfolioRisk();
 
 });
 
-updateRollingBeta();
-updateRegime();
+async function init(){
+
+await updateRegime();
+
+await updateRollingBeta();
+
+await updatePortfolioRisk();
+
+}
+
+init();
 
 </script>
 
