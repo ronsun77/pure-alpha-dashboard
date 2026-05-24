@@ -148,6 +148,10 @@
       border-radius:8px;
     }
 
+    .loading{
+      color:#38bdf8;
+    }
+
     @media (max-width:900px){
 
       .top-grid{
@@ -394,27 +398,27 @@
 
           <tr>
             <td>QLD</td>
-            <td>Loading...</td>
+            <td class="loading">Loading...</td>
           </tr>
 
           <tr>
             <td>TLT</td>
-            <td>Loading...</td>
+            <td class="loading">Loading...</td>
           </tr>
 
           <tr>
             <td>GLD</td>
-            <td>Loading...</td>
+            <td class="loading">Loading...</td>
           </tr>
 
           <tr>
             <td>UUP</td>
-            <td>Loading...</td>
+            <td class="loading">Loading...</td>
           </tr>
 
           <tr>
             <td>SGOV</td>
-            <td>Loading...</td>
+            <td class="loading">Loading...</td>
           </tr>
 
         </tbody>
@@ -490,7 +494,7 @@ async function fetchPrices(symbol){
 
     if(!data.values){
 
-      console.log(symbol,data);
+      console.log(symbol, data);
 
       return [];
 
@@ -510,18 +514,17 @@ async function fetchPrices(symbol){
 
 }
 
-// 計算 Daily Returns
+// Daily Returns
 function calcReturns(prices){
 
   let returns = [];
 
   for(let i=1;i<prices.length;i++){
 
-    returns.push(
+    const ret =
+      (prices[i]-prices[i-1]) / prices[i-1];
 
-      (prices[i]-prices[i-1]) / prices[i-1]
-
-    );
+    returns.push(ret);
 
   }
 
@@ -532,6 +535,8 @@ function calcReturns(prices){
 // 平均
 function mean(arr){
 
+  if(arr.length === 0) return 0;
+
   return arr.reduce((a,b)=>a+b,0) / arr.length;
 
 }
@@ -539,23 +544,32 @@ function mean(arr){
 // 共變異數
 function covariance(a,b){
 
-  const avgA = mean(a);
-  const avgB = mean(b);
+  const len = Math.min(a.length,b.length);
+
+  if(len === 0) return 0;
+
+  const aa = a.slice(-len);
+  const bb = b.slice(-len);
+
+  const avgA = mean(aa);
+  const avgB = mean(bb);
 
   let sum = 0;
 
-  for(let i=0;i<a.length;i++){
+  for(let i=0;i<len;i++){
 
-    sum += (a[i]-avgA)*(b[i]-avgB);
+    sum += (aa[i]-avgA)*(bb[i]-avgB);
 
   }
 
-  return sum / a.length;
+  return sum / len;
 
 }
 
 // 變異數
 function variance(arr){
+
+  if(arr.length === 0) return 0;
 
   const avg = mean(arr);
 
@@ -574,40 +588,69 @@ function variance(arr){
 // Beta
 function calcBeta(assetReturns, benchmarkReturns){
 
-  return covariance(assetReturns, benchmarkReturns)
-       /
-       variance(benchmarkReturns);
+  const cov =
+    covariance(assetReturns, benchmarkReturns);
+
+  const vari =
+    variance(benchmarkReturns);
+
+  if(vari === 0 || isNaN(vari)){
+
+    return 0;
+
+  }
+
+  const beta = cov / vari;
+
+  if(!isFinite(beta) || isNaN(beta)){
+
+    return 0;
+
+  }
+
+  return beta;
 
 }
 
 // 更新 Beta Table
 async function updateRollingBeta(){
 
-  const tableRows =
-    document.querySelectorAll("#beta-table tbody tr");
+  try{
 
-  // benchmark
-  const benchmarkPrices =
-    await fetchPrices(benchmark);
+    const tableRows =
+      document.querySelectorAll("#beta-table tbody tr");
 
-  const benchmarkReturns =
-    calcReturns(benchmarkPrices).slice(-windowSize);
+    // benchmark
+    const benchmarkPrices =
+      await fetchPrices(benchmark);
 
-  for(let i=0;i<assets.length;i++){
+    const benchmarkReturns =
+      calcReturns(benchmarkPrices).slice(-windowSize);
 
-    const asset = assets[i];
+    for(let i=0;i<assets.length;i++){
 
-    const prices =
-      await fetchPrices(asset);
+      const asset = assets[i];
 
-    const returns =
-      calcReturns(prices).slice(-windowSize);
+      const prices =
+        await fetchPrices(asset);
 
-    const beta =
-      calcBeta(returns, benchmarkReturns);
+      const returns =
+        calcReturns(prices).slice(-windowSize);
 
-    tableRows[i].children[1].innerText =
-      beta.toFixed(2);
+      const beta =
+        calcBeta(returns, benchmarkReturns);
+
+      tableRows[i].children[1].innerText =
+
+        isFinite(beta)
+        ? beta.toFixed(2)
+        : "0.00";
+
+    }
+
+  }catch(error){
+
+    console.error(error);
 
   }
 
