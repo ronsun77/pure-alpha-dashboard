@@ -5,7 +5,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<title>Pure Alpha 多資產戰情室 V3</title>
+<title>Pure Alpha 戰情室 V4</title>
 
 <style>
 
@@ -23,14 +23,14 @@ body{
 }
 
 .container{
-  max-width:1600px;
+  max-width:1700px;
   margin:auto;
 }
 
 h1{
-  font-size:36px;
-  margin-bottom:10px;
+  font-size:40px;
   color:white;
+  margin-bottom:10px;
 }
 
 .subtitle{
@@ -48,12 +48,13 @@ h1{
   background:#1e293b;
   border-radius:18px;
   padding:24px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.3);
+  box-shadow:0 4px 20px rgba(0,0,0,0.35);
 }
 
 .card h2{
   color:#38bdf8;
   margin-bottom:20px;
+  font-size:24px;
 }
 
 .metric{
@@ -72,8 +73,8 @@ h1{
 }
 
 .value{
-  font-weight:bold;
   color:white;
+  font-weight:bold;
 }
 
 .green{
@@ -88,10 +89,13 @@ h1{
   color:#facc15;
 }
 
+.blue{
+  color:#38bdf8;
+}
+
 table{
   width:100%;
   border-collapse:collapse;
-  margin-top:10px;
 }
 
 th,td{
@@ -105,6 +109,12 @@ th{
   color:white;
 }
 
+.footer{
+  margin-top:40px;
+  text-align:center;
+  color:#94a3b8;
+}
+
 select{
   background:#0f172a;
   color:white;
@@ -113,10 +123,31 @@ select{
   border-radius:8px;
 }
 
-.footer{
-  margin-top:30px;
+.regime-box{
+  padding:20px;
+  border-radius:16px;
+  margin-top:20px;
   text-align:center;
-  color:#94a3b8;
+  font-size:22px;
+  font-weight:bold;
+}
+
+.bull-box{
+  background:rgba(34,197,94,0.15);
+  border:2px solid #22c55e;
+  color:#22c55e;
+}
+
+.bear-box{
+  background:rgba(239,68,68,0.15);
+  border:2px solid #ef4444;
+  color:#ef4444;
+}
+
+.defense-box{
+  background:rgba(250,204,21,0.15);
+  border:2px solid #facc15;
+  color:#facc15;
 }
 
 </style>
@@ -126,10 +157,10 @@ select{
 
 <div class="container">
 
-<h1>Pure Alpha 多資產戰情室 V3</h1>
+<h1>Pure Alpha 戰情室 V4</h1>
 
 <div class="subtitle">
-Regime 市場判定 × 多資產動態配置 × Rolling Beta 監控
+Regime Engine × Dynamic Allocation × Rolling Beta × Tactical Overlay
 </div>
 
 <div class="grid">
@@ -137,81 +168,80 @@ Regime 市場判定 × 多資產動態配置 × Rolling Beta 監控
 <!-- Regime -->
 <div class="card">
 
-<h2>市場 Regime</h2>
+<h2>市場 Regime Engine</h2>
 
 <div class="metric">
-  <span class="label">QQQ MA200 狀態</span>
-  <span id="qqq-status" class="value yellow">Loading...</span>
-</div>
-
-<div class="metric">
-  <span class="label">QQQ 現價</span>
-  <span id="qqq-price" class="value">Loading...</span>
+<span class="label">QQQ 現價</span>
+<span id="qqq-price" class="value">Loading...</span>
 </div>
 
 <div class="metric">
-  <span class="label">QQQ MA200</span>
-  <span id="qqq-ma200" class="value">Loading...</span>
+<span class="label">QQQ MA200</span>
+<span id="qqq-ma200" class="value">Loading...</span>
 </div>
 
 <div class="metric">
-  <span class="label">目前市場</span>
-  <span id="market-regime" class="value">Loading...</span>
+<span class="label">SPY Drawdown</span>
+<span id="spy-dd" class="value yellow">Loading...</span>
+</div>
+
+<div class="metric">
+<span class="label">市場狀態</span>
+<span id="market-status" class="value">Loading...</span>
+</div>
+
+<div id="regime-box" class="regime-box bull-box">
+Loading...
 </div>
 
 </div>
 
-<!-- Allocation -->
+<!-- Dynamic Allocation -->
 <div class="card">
 
-<h2>Base Allocation</h2>
+<h2>Dynamic Allocation Engine</h2>
 
-<table>
+<table id="allocation-table">
 
 <thead>
+
 <tr>
 <th>資產</th>
-<th>牛市</th>
-<th>熊市</th>
+<th>目前權重</th>
 </tr>
+
 </thead>
 
 <tbody>
 
 <tr>
 <td>QQQ</td>
-<td>26%</td>
-<td>20%</td>
+<td id="w-qqq">-</td>
 </tr>
 
 <tr>
 <td>QLD</td>
-<td>32%</td>
-<td>20%</td>
+<td id="w-qld">-</td>
 </tr>
 
 <tr>
 <td>TLT</td>
-<td>7%</td>
-<td>10%</td>
+<td id="w-tlt">-</td>
 </tr>
 
 <tr>
 <td>GLD</td>
-<td>7%</td>
-<td>10%</td>
+<td id="w-gld">-</td>
 </tr>
 
 <tr>
 <td>UUP</td>
-<td>9%</td>
-<td>20%</td>
+<td id="w-uup">-</td>
 </tr>
 
 <tr>
 <td>SGOV</td>
-<td>19%</td>
-<td>20%</td>
+<td id="w-sgov">-</td>
 </tr>
 
 </tbody>
@@ -223,7 +253,7 @@ Regime 市場判定 × 多資產動態配置 × Rolling Beta 監控
 <!-- Rolling Beta -->
 <div class="card">
 
-<h2>Rolling Beta 監控</h2>
+<h2>Rolling Beta 系統</h2>
 
 <div style="margin-bottom:20px;">
 
@@ -249,38 +279,21 @@ Benchmark：
 <table id="beta-table">
 
 <thead>
+
 <tr>
 <th>資產</th>
 <th>Rolling Beta</th>
 </tr>
+
 </thead>
 
 <tbody>
 
-<tr>
-<td>QLD</td>
-<td>Loading...</td>
-</tr>
-
-<tr>
-<td>TLT</td>
-<td>Loading...</td>
-</tr>
-
-<tr>
-<td>GLD</td>
-<td>Loading...</td>
-</tr>
-
-<tr>
-<td>UUP</td>
-<td>Loading...</td>
-</tr>
-
-<tr>
-<td>SGOV</td>
-<td>Loading...</td>
-</tr>
+<tr><td>QLD</td><td>Loading...</td></tr>
+<tr><td>TLT</td><td>Loading...</td></tr>
+<tr><td>GLD</td><td>Loading...</td></tr>
+<tr><td>UUP</td><td>Loading...</td></tr>
+<tr><td>SGOV</td><td>Loading...</td></tr>
 
 </tbody>
 
@@ -288,29 +301,29 @@ Benchmark：
 
 </div>
 
-<!-- Overlay -->
+<!-- Tactical Overlay -->
 <div class="card">
 
 <h2>戰術 Overlay</h2>
 
 <div class="metric">
 <span class="label">QQQ &lt; MA200 × 0.97</span>
-<span class="value red">QLD 全面出場</span>
+<span id="overlay-1" class="value red">Waiting...</span>
 </div>
 
 <div class="metric">
-<span class="label">SPX -10%</span>
-<span class="value green">+5% QLD</span>
+<span class="label">SPY 回撤 -10%</span>
+<span id="overlay-2" class="value">Waiting...</span>
 </div>
 
 <div class="metric">
-<span class="label">SPX -19%</span>
-<span class="value green">+10% QLD</span>
+<span class="label">SPY 回撤 -19%</span>
+<span id="overlay-3" class="value">Waiting...</span>
 </div>
 
 <div class="metric">
-<span class="label">SPX -30%</span>
-<span class="value green">+15% QLD</span>
+<span class="label">SPY 回撤 -30%</span>
+<span id="overlay-4" class="value">Waiting...</span>
 </div>
 
 </div>
@@ -319,7 +332,7 @@ Benchmark：
 
 <div class="footer">
 
-Pure Alpha 多資產戰情室 V3
+Pure Alpha 多資產動態戰情室 V4
 
 </div>
 
@@ -327,18 +340,41 @@ Pure Alpha 多資產戰情室 V3
 
 <script>
 
-const API_KEY = "b286e5ff15bc4cf8a2eb07d873e3ed3a";
+const API_KEY = "YOUR_TWELVE_DATA_KEY";
 
 const assets = ["QLD","TLT","GLD","UUP","SGOV"];
 
 let benchmark = "QQQ";
 let windowSize = 21;
 
-// API 抓資料
+// Base Allocation
+const bullBase = {
+
+  QQQ:26,
+  QLD:32,
+  TLT:7,
+  GLD:7,
+  UUP:9,
+  SGOV:19
+
+};
+
+const bearBase = {
+
+  QQQ:20,
+  QLD:20,
+  TLT:10,
+  GLD:10,
+  UUP:20,
+  SGOV:20
+
+};
+
+// 抓價格
 async function fetchPrices(symbol){
 
   const url =
-  `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=200&apikey=${API_KEY}`;
+  `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=250&apikey=${API_KEY}`;
 
   const response = await fetch(url);
 
@@ -352,7 +388,6 @@ async function fetchPrices(symbol){
 
   }
 
-  // 關鍵修正：舊→新
   return data.values
     .map(v => parseFloat(v.close))
     .reverse();
@@ -362,17 +397,17 @@ async function fetchPrices(symbol){
 // Return
 function calcReturns(prices){
 
-  let returns = [];
+  let arr = [];
 
   for(let i=1;i<prices.length;i++){
 
-    returns.push(
+    arr.push(
       (prices[i]-prices[i-1]) / prices[i-1]
     );
 
   }
 
-  return returns;
+  return arr;
 
 }
 
@@ -446,7 +481,7 @@ function calcBeta(assetReturns, benchmarkReturns){
 
 }
 
-// 更新 Beta
+// Rolling Beta
 async function updateRollingBeta(){
 
   const benchmarkPrices =
@@ -494,45 +529,146 @@ async function updateRollingBeta(){
 
 }
 
-// 更新 MA200
-async function updateMA200(){
+// 更新 Regime
+async function updateRegime(){
 
-  const prices =
+  const qqqPrices =
     await fetchPrices("QQQ");
 
-  const current =
-    prices[prices.length-1];
+  const spyPrices =
+    await fetchPrices("SPY");
+
+  const qqq =
+    qqqPrices[qqqPrices.length-1];
 
   const ma200 =
-    prices.slice(-200)
+    qqqPrices.slice(-200)
     .reduce((a,b)=>a+b,0)/200;
 
+  const spy =
+    spyPrices[spyPrices.length-1];
+
+  const spyHigh =
+    Math.max(...spyPrices);
+
+  const drawdown =
+    ((spy-spyHigh)/spyHigh)*100;
+
+  // 顯示
   document.getElementById("qqq-price")
-    .innerText = current.toFixed(2);
+    .innerText = qqq.toFixed(2);
 
   document.getElementById("qqq-ma200")
     .innerText = ma200.toFixed(2);
 
+  document.getElementById("spy-dd")
+    .innerText = drawdown.toFixed(1)+"%";
+
+  // Regime 判定
+  let regime = "";
+  let regimeClass = "";
+
+  let alloc = {};
+
+  const qqqBelow97 =
+    qqq < ma200*0.97;
+
   const bull =
-    current > ma200;
+    qqq > ma200;
 
-  document.getElementById("qqq-status")
-    .innerText =
-      bull
-      ? "Above MA200"
-      : "Below MA200";
+  if(bull){
 
-  document.getElementById("qqq-status")
-    .className =
-      bull
-      ? "value green"
-      : "value red";
+    regime = "Bull Market";
+    regimeClass = "bull-box";
 
-  document.getElementById("market-regime")
-    .innerText =
-      bull
-      ? "Bull Market"
-      : "Bear Market";
+    alloc = {...bullBase};
+
+  }else{
+
+    regime = "Bear Market";
+    regimeClass = "bear-box";
+
+    alloc = {...bearBase};
+
+  }
+
+  // QLD Overlay
+  if(qqqBelow97){
+
+    alloc.SGOV += alloc.QLD;
+    alloc.QLD = 0;
+
+    document.getElementById("overlay-1")
+      .innerText = "Trigger";
+
+  }else{
+
+    document.getElementById("overlay-1")
+      .innerText = "Inactive";
+
+  }
+
+  // Drawdown Overlay
+  if(drawdown <= -10){
+
+    alloc.QLD += 5;
+    alloc.SGOV -= 5;
+
+    document.getElementById("overlay-2")
+      .innerText = "Trigger";
+
+  }
+
+  if(drawdown <= -19){
+
+    alloc.QLD += 10;
+    alloc.SGOV -= 10;
+
+    document.getElementById("overlay-3")
+      .innerText = "Trigger";
+
+  }
+
+  if(drawdown <= -30){
+
+    alloc.QLD += 15;
+    alloc.SGOV -= 15;
+
+    document.getElementById("overlay-4")
+      .innerText = "Trigger";
+
+  }
+
+  // 更新 Allocation
+  document.getElementById("w-qqq")
+    .innerText = alloc.QQQ+"%";
+
+  document.getElementById("w-qld")
+    .innerText = alloc.QLD+"%";
+
+  document.getElementById("w-tlt")
+    .innerText = alloc.TLT+"%";
+
+  document.getElementById("w-gld")
+    .innerText = alloc.GLD+"%";
+
+  document.getElementById("w-uup")
+    .innerText = alloc.UUP+"%";
+
+  document.getElementById("w-sgov")
+    .innerText = alloc.SGOV+"%";
+
+  document.getElementById("market-status")
+    .innerText = regime;
+
+  const box =
+    document.getElementById("regime-box");
+
+  box.className =
+    "regime-box "+regimeClass;
+
+  box.innerText =
+    regime;
 
 }
 
@@ -560,7 +696,7 @@ document
 
 // 啟動
 updateRollingBeta();
-updateMA200();
+updateRegime();
 
 </script>
 
