@@ -1,723 +1,1083 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pure Alpha 戰情室 V6 - 全功能自動量化版</title>
+
+<title>Pure Alpha 戰情室 V6</title>
+
 <style>
+
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family: 'Segoe UI', Arial, sans-serif;
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
 }
 
 body{
-    background:#081028;
-    color:#e2e8f0;
-    padding:20px;
+background:#081028;
+color:#e2e8f0;
+padding:20px;
 }
 
 .container{
-    max-width:1900px;
-    margin:auto;
-}
-
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #1e293b;
-    padding-bottom: 15px;
-    margin-bottom: 30px;
+max-width:1900px;
+margin:auto;
 }
 
 h1{
-    font-size:36px;
-    color:white;
+font-size:42px;
+margin-bottom:10px;
+color:white;
 }
 
 .subtitle{
-    color:#94a3b8;
-    font-size: 14px;
-    margin-top: 5px;
+color:#94a3b8;
+margin-bottom:30px;
 }
 
 .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(440px,1fr));
-    gap:25px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
+gap:20px;
 }
 
 .card{
-    background:#17233a;
-    border-radius:20px;
-    padding:24px;
-    box-shadow:0 4px 25px rgba(0,0,0,0.35);
-    border: 1px solid #24334d;
-    position: relative;
+background:#17233a;
+border-radius:20px;
+padding:24px;
+box-shadow:0 4px 25px rgba(0,0,0,0.35);
 }
 
 .card h2{
-    color:#38bdf8;
-    margin-bottom:20px;
-    font-size: 20px;
-    border-left: 4px solid #38bdf8;
-    padding-left: 10px;
+color:#38bdf8;
+margin-bottom:20px;
 }
 
 .metric{
-    display:flex;
-    justify-content:space-between;
-    align-items: center;
-    padding:12px 0;
-    border-bottom:1px solid #24334d;
+display:flex;
+justify-content:space-between;
+padding:12px 0;
+border-bottom:1px solid #334155;
 }
 
 .metric:last-child{
-    border-bottom:none;
+border-bottom:none;
 }
 
 .label{
-    color:#cbd5e1;
+color:#cbd5e1;
 }
 
 .value{
-    color:white;
-    font-weight:bold;
-    font-family: monospace;
-    font-size: 16px;
+color:white;
+font-weight:bold;
 }
 
-.green{ color:#22c55e; }
-.red{ color:#ef4444; }
-.yellow{ color:#facc15; }
+.green{
+color:#22c55e;
+}
+
+.red{
+color:#ef4444;
+}
+
+.yellow{
+color:#facc15;
+}
 
 table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top: 5px;
+width:100%;
+border-collapse:collapse;
 }
 
 th,td{
-    padding:12px 10px;
-    text-align:center;
-    border-bottom:1px solid #24334d;
-    font-size: 14px;
+padding:14px;
+text-align:center;
+border-bottom:1px solid #334155;
 }
 
 th{
-    background:#1e293b;
-    color: #94a3b8;
-    font-weight: 600;
+background:#334155;
 }
 
-td {
-    color: #e2e8f0;
-}
-
-select {
-    background:#081028;
-    color:white;
-    border:1px solid #334155;
-    padding:6px 12px;
-    border-radius:8px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-input[type="range"] {
-    width: 100%;
-    accent-color: #38bdf8;
-    cursor: pointer;
-}
-
-.slider-container {
-    margin-bottom: 15px;
-}
-
-.slider-container label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    color: #cbd5e1;
-    margin-bottom: 5px;
-}
-
-.slider-container label span {
-    font-weight: bold;
-    color: #38bdf8;
+select{
+background:#081028;
+color:white;
+border:1px solid #334155;
+padding:8px 12px;
+border-radius:8px;
 }
 
 .regime-box{
-    margin-top:20px;
-    padding:18px;
-    border-radius:12px;
-    text-align:center;
-    font-size:20px;
-    font-weight:bold;
+margin-top:20px;
+padding:20px;
+border-radius:16px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
 }
 
-.bull-box{ background:rgba(34,197,94,0.15); border:1px solid #22c55e; color:#22c55e; }
-.bear-box{ background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#ef4444; }
-.neutral-box{ background:rgba(250,204,21,0.15); border:2px solid #facc15; color:#facc15; }
-
-.loading-overlay {
-    position: absolute; top:0; left:0; width:100%; height:100%; 
-    background: rgba(8,16,40,0.85); display: none; justify-content: center; 
-    align-items: center; border-radius: 20px; z-index: 10; color: #38bdf8; font-weight: bold; font-size: 18px;
+.bull-box{
+background:rgba(34,197,94,0.15);
+border:2px solid #22c55e;
+color:#22c55e;
 }
 
-.badge-action {
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 12px;
-    display: inline-block;
+.bear-box{
+background:rgba(239,68,68,0.15);
+border:2px solid #ef4444;
+color:#ef4444;
 }
-.badge-buy { background: rgba(34,197,94,0.2); color: #22c55e; }
-.badge-sell { background: rgba(239,68,68,0.2); color: #ef4444; }
-.badge-hold { background: rgba(148,163,184,0.15); color: #94a3b8; }
-.badge-critical { background: #ef4444; color: white; animation: pulse 1.5s infinite; }
 
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
+.neutral-box{
+background:rgba(250,204,21,0.15);
+border:2px solid #facc15;
+color:#facc15;
 }
 
 .footer{
-    margin-top:50px;
-    padding-top: 20px;
-    border-top: 1px solid #1e293b;
-    text-align:center;
-    color:#64748b;
-    font-size: 13px;
+margin-top:40px;
+text-align:center;
+color:#94a3b8;
 }
 
-.risk-on{ color:#22c55e; font-weight: bold; }
-.risk-off{ color:#ef4444; font-weight: bold; }
+.risk-on{
+color:#22c55e;
+}
+
+.risk-off{
+color:#ef4444;
+}
+
 </style>
 </head>
 
 <body>
 
 <div class="container">
-<header>
-    <div>
-        <h1>Pure Alpha 戰情室 V6</h1>
-        <div class="subtitle">Regime Engine × Dynamic Allocation × Dynamic Rolling Matrix</div>
-    </div>
-    <div>
-        <select id="engine-mode" onchange="toggleEngineMode()">
-            <option value="sim">🔮 全手動模擬控制模式</option>
-            <option value="api" selected>🌐 API 自動同步模式 (Yahoo Finance)</option>
-        </select>
-    </div>
-</header>
+
+<h1>Pure Alpha 戰情室 V6</h1>
+
+<div class="subtitle">
+Regime Engine × Dynamic Allocation × Correlation Matrix × Portfolio Risk Engine
+</div>
 
 <div class="grid">
 
-    <div class="card">
-        <div id="loading-sim" class="loading-overlay">數據即時連線中...</div>
-        <h2>環境參數模擬控制面板</h2>
-        <div style="margin-top: 15px;">
-            <div class="slider-container">
-                <label>QQQ 模擬/現價: <span id="v-qqq-price">717.54</span></label>
-                <input type="range" id="param-qqq-price" min="500" max="850" step="0.01" value="717.54" oninput="runSystemCore()">
-            </div>
-            <div class="slider-container">
-                <label>QQQ MA200 基準線: <span id="v-qqq-ma200">612.72</span></label>
-                <input type="range" id="param-ma200" min="550" max="650" step="0.01" value="612.72" oninput="runSystemCore()">
-            </div>
-            <div class="slider-container">
-                <label>動態縮放 K 值: <span id="v-k-value">1.137</span></label>
-                <input type="range" id="param-k" min="0.500" max="1.500" step="0.001" value="1.137" oninput="runSystemCore()">
-            </div>
-            <div class="slider-container">
-                <label>換倉最小調整門檻: <span id="v-threshold">2.0%</span></label>
-                <input type="range" id="param-threshold" min="0.5" max="5.0" step="0.1" value="2.0" oninput="runSystemCore()">
-            </div>
-            <div class="metric" style="margin-top: 10px; padding-bottom: 0; border: none;">
-                <span class="label">斷頭台防線 (MA200 × 0.97)</span>
-                <span id="display-cutoff" class="value red">594.34</span>
-            </div>
-        </div>
-    </div>
+<!-- 市場 -->
+<div class="card">
 
-    <div class="card">
-        <h2>市場 Regime Engine</h2>
-        <div class="metric">
-            <span class="label">QQQ 當前價格</span>
-            <span id="qqq-price" class="value yellow">717.54</span>
-        </div>
-        <div class="metric">
-            <span class="label">QQQ MA200 均線</span>
-            <span id="qqq-ma200" class="value">612.72</span>
-        </div>
-        <div class="metric">
-            <span class="label">SPY 當前回撤 (從年高點)</span>
-            <span id="spy-dd" class="value yellow">-9.79%</span>
-        </div>
-        <div class="metric">
-            <span class="label">環境強弱比值 (Ratio)</span>
-            <span id="market-status" class="value green">1.171</span>
-        </div>
-        <div id="regime-box" class="regime-box bull-box">
-            核心進攻模式
-        </div>
-    </div>
+<h2>市場 Regime Engine</h2>
 
-    <div class="card" style="grid-column: span 2;">
-        <h2>Dynamic Allocation & Trade Action</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>資產代碼</th>
-                    <th>目前實倉 (Current)</th>
-                    <th>目標權重 (Target)</th>
-                    <th>部位落差 (Diff)</th>
-                    <th>最小換倉門檻</th>
-                    <th>執行交易指令 (Action)</th>
-                </tr>
-            </thead>
-            <tbody id="allocation-table-body">
-                </tbody>
-        </table>
-    </div>
+<div class="metric">
+<span class="label">QQQ 現價</span>
+<span id="qqq-price" class="value yellow">Loading...</span>
+</div>
 
-    <div class="card" style="grid-column: span 2;">
-        <div id="loading-matrix" class="loading-overlay">矩陣重新運算中...</div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom:20px;">
-            <h2>Rolling Beta & Correlation 系統</h2>
-            <div style="display: flex; gap: 20px;">
-                <div>
-                    <label style="font-size:13px; color:#94a3b8;">對標商品 (Benchmark)：</label>
-                    <select id="benchmark-select" onchange="runSystemCore()">
-                        <option value="QQQ" selected>QQQ</option>
-                        <option value="SPY">SPY</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size:13px; color:#94a3b8;">統計週期 (Window)：</label>
-                    <select id="window-select" onchange="runSystemCore()">
-                        <option value="21" selected>21D (月週期)</option>
-                        <option value="63">63D (季週期)</option>
-                        <option value="126">126D (半年週期)</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>資產代碼</th>
-                    <th>戰術角色定義</th>
-                    <th>動態相關性 (Correlation)</th>
-                    <th>動態對標 Beta 數值</th>
-                </tr>
-            </thead>
-            <tbody id="matrix-table-body">
-                </tbody>
-        </table>
-    </div>
+<div class="metric">
+<span class="label">QQQ MA200</span>
+<span id="qqq-ma200" class="value yellow">Loading...</span>
+</div>
 
-    <div class="card">
-        <h2>Portfolio Risk Engine</h2>
-        <div class="metric">
-            <span class="label">投資組合預估年化波動率</span>
-            <span id="portfolio-vol" class="value green">15.82%</span>
-        </div>
-        <div class="metric">
-            <span class="label">投資組合總體 Beta</span>
-            <span id="portfolio-beta" class="value yellow">1.08</span>
-        </div>
-        <div class="metric">
-            <span class="label">風控狀態安全評級</span>
-            <span id="risk-status" class="value">--</span>
-        </div>
-    </div>
+<div class="metric">
+<span class="label">SPY 回撤</span>
+<span id="spy-dd" class="value yellow">Loading...</span>
+</div>
 
-    <div class="card">
-        <h2>Risk Contribution (邊際風險佔比)</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>資產代碼</th>
-                    <th>風險邊際貢獻比 (%)</th>
-                </tr>
-            </thead>
-            <tbody id="rc-table-body">
-                </tbody>
-        </table>
-    </div>
+<div class="metric">
+<span class="label">市場狀態</span>
+<span id="market-status" class="value">Loading...</span>
+</div>
 
-    <div class="card" style="grid-column: span 2;">
-        <h2>Regime Score Engine (多因子驗證模組)</h2>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div>
-                <div class="metric">
-                    <span class="label">因子 1: 價格高於長期均線 (QQQ > MA200)</span>
-                    <span id="score-ma200" class="value">-</span>
-                </div>
-                <div class="metric">
-                    <span class="label">因子 2: 價格高於波段動能線 (QQQ > MA50)</span>
-                    <span id="score-ma50" class="value">-</span>
-                </div>
-                <div class="metric">
-                    <span class="label">因子 3: 大盤系統風險受控 (SPY 回撤 > -10%)</span>
-                    <span id="score-dd" class="value">-</span>
-                </div>
-                <div class="metric">
-                    <span class="label">因子 4: 避險長債趨勢防禦 (TLT < MA50)</span>
-                    <span id="score-tlt" class="value">-</span>
-                </div>
-                <div class="metric">
-                    <span class="label">因子 5: 美元流動性安全指標 (UUP < MA50)</span>
-                    <span id="score-uup" class="value">-</span>
-                </div>
-                <div class="metric" style="border: none;">
-                    <span class="label" style="font-weight: bold; color: white;">綜合多因子總得分 (Total Score)</span>
-                    <span id="regime-score-total" class="value yellow" style="font-size:20px;">-</span>
-                </div>
-            </div>
-            <div style="display:flex; flex-direction:column; justify-content:center;">
-                <div id="regime-final-box" class="regime-box bull-box" style="height: 80%; display: flex; align-items: center; justify-content: center; font-size: 24px;">
-                    計算中...
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="regime-box" class="regime-box bull-box">
+Loading...
+</div>
+
+</div>
+
+<!-- 配置 -->
+<div class="card">
+
+<h2>Dynamic Allocation</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>資產</th>
+<th>權重</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr><td>QQQ</td><td id="w-qqq">-</td></tr>
+<tr><td>QLD</td><td id="w-qld">-</td></tr>
+<tr><td>TLT</td><td id="w-tlt">-</td></tr>
+<tr><td>GLD</td><td id="w-gld">-</td></tr>
+<tr><td>UUP</td><td id="w-uup">-</td></tr>
+<tr><td>SGOV</td><td id="w-sgov">-</td></tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- Rolling Beta -->
+<div class="card">
+
+<h2>Rolling Beta 系統</h2>
+
+<div style="margin-bottom:20px;">
+
+Benchmark：
+
+<select id="benchmark-select">
+<option value="QQQ">QQQ</option>
+<option value="SPY">SPY</option>
+</select>
+
+&nbsp;&nbsp;&nbsp;
+
+週期：
+
+<select id="window-select">
+<option value="21">21D</option>
+<option value="63">63D</option>
+<option value="126">126D</option>
+</select>
+
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>資產</th>
+<th>Rolling Beta</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr><td>QLD</td><td id="beta-qld">-</td></tr>
+<tr><td>TLT</td><td id="beta-tlt">-</td></tr>
+<tr><td>GLD</td><td id="beta-gld">-</td></tr>
+<tr><td>UUP</td><td id="beta-uup">-</td></tr>
+<tr><td>SGOV</td><td id="beta-sgov">-</td></tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- Correlation -->
+<div class="card">
+
+<h2>Rolling Correlation Matrix</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>資產</th>
+<th>Correlation</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr><td>QLD</td><td id="corr-qld">-</td></tr>
+<tr><td>TLT</td><td id="corr-tlt">-</td></tr>
+<tr><td>GLD</td><td id="corr-gld">-</td></tr>
+<tr><td>UUP</td><td id="corr-uup">-</td></tr>
+<tr><td>SGOV</td><td id="corr-sgov">-</td></tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- Portfolio Risk -->
+<div class="card">
+
+<h2>Portfolio Risk Engine</h2>
+
+<div class="metric">
+<span class="label">投資組合波動率</span>
+<span id="portfolio-vol" class="value yellow">Loading...</span>
+</div>
+
+<div class="metric">
+<span class="label">投資組合 Beta</span>
+<span id="portfolio-beta" class="value yellow">Loading...</span>
+</div>
+
+<div class="metric">
+<span class="label">風險狀態</span>
+<span id="risk-status" class="value">Loading...</span>
+</div>
+
+</div>
+
+<!-- Risk Contribution -->
+<div class="card">
+
+<h2>Risk Contribution</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>資產</th>
+<th>風險貢獻</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr><td>QQQ</td><td id="rc-qqq">-</td></tr>
+<tr><td>QLD</td><td id="rc-qld">-</td></tr>
+<tr><td>TLT</td><td id="rc-tlt">-</td></tr>
+<tr><td>GLD</td><td id="rc-gld">-</td></tr>
+<tr><td>UUP</td><td id="rc-uup">-</td></tr>
+<tr><td>SGOV</td><td id="rc-sgov">-</td></tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- Regime Score -->
+<div class="card">
+
+<h2>Regime Score Engine</h2>
+
+<div class="metric">
+<span class="label">QQQ > MA200</span>
+<span id="score-ma200" class="value">-</span>
+</div>
+
+<div class="metric">
+<span class="label">QQQ > MA50</span>
+<span id="score-ma50" class="value">-</span>
+</div>
+
+<div class="metric">
+<span class="label">SPY Drawdown</span>
+<span id="score-dd" class="value">-</span>
+</div>
+
+<div class="metric">
+<span class="label">TLT Trend</span>
+<span id="score-tlt" class="value">-</span>
+</div>
+
+<div class="metric">
+<span class="label">Dollar Trend</span>
+<span id="score-uup" class="value">-</span>
+</div>
+
+<div class="metric">
+<span class="label">總 Score</span>
+<span id="regime-score-total" class="value yellow">-</span>
+</div>
+
+<div id="regime-final-box" class="regime-box bull-box">
+Loading...
+</div>
+
+</div>
 
 </div>
 
 <div class="footer">
-    Pure Alpha 多資產風險作戰系統 V6 | Matrix Calculator & Auto API Engine v7.2
+Pure Alpha 多資產風險作戰系統 V6
 </div>
+
 </div>
 
 <script>
-// ==========================================
-// 1. 策略核心部位與常數配置
-// ==========================================
-const currentWeights = { QQQ: 28.71, QLD: 35.66, TLT: 7.80, GLD: 7.65, UUP: 8.00, SGOV: 12.18 };
-const bullBase = { QQQ: 26.0, QLD: 32.0, TLT: 7.0, GLD: 7.0, UUP: 9.0 };
-const bearBase = { QQQ: 13.8, QLD: 0.0,  TLT: 9.9, GLD: 10.1, UUP: 24.5 };
-const assetRoles = { QQQ: "核心成長引擎", QLD: "動能槓桿放大", TLT: "長債負相關避險", GLD: "抗通膨終極防禦", UUP: "美元流動性避險", SGOV: "流動性緩衝海綿池" };
 
-let cachedPrices = {}; // 快取一整年歷史收盤價陣列
+const API_KEY = "YOUR_TWELVE_DATA_KEY";
 
-// ==========================================
-// 2. 統計學與線性代數核心數學公式
-// ==========================================
-function mean(arr) { return arr.length === 0 ? 0 : arr.reduce((a, b) => a + b, 0) / arr.length; }
-function std(arr) { if (arr.length < 2) return 0; const avg = mean(arr); return Math.sqrt(arr.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) / arr.length); }
-function covariance(a, b) { if (a.length === 0 || b.length === 0) return 0; const avgA = mean(a), avgB = mean(b); return a.reduce((sum, val, i) => sum + (val - avgA) * (b[i] - avgB), 0) / a.length; }
-function correlation(a, b) { const sdA = std(a), sdB = std(b); return (sdA === 0 || sdB === 0) ? 0 : covariance(a, b) / (sdA * sdB); }
-function calcReturns(prices) { return prices.slice(1).map((p, i) => (p - prices[i]) / prices[i]); }
-function calcBeta(assetRet, benchRet) { const benchVar = Math.pow(std(benchRet), 2); return benchVar === 0 ? 0 : covariance(assetRet, benchRet) / benchVar; }
+const assets = [
+"QQQ",
+"QLD",
+"TLT",
+"GLD",
+"UUP",
+"SGOV"
+];
 
-// ==========================================
-// 3. 全自動 API 數據抓取模組 (Yahoo Finance)
-// ==========================================
-async function fetchYahooData(ticker) {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1y`;
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${Date.now()}`;
-    try {
-        const response = await fetch(proxyUrl);
-        const data = await response.json();
-        return data.chart.result[0].indicators.quote[0].close.filter(v => v !== null);
-    } catch (error) {
-        console.error(`Fetch failed for ${ticker}`, error);
-        return [];
-    }
-}
+let cachedPrices = {};
 
-// 觸發全自動 API 同步功能
-async function triggerAutoSync() {
-    document.getElementById("loading-sim").style.display = "flex";
-    document.getElementById("loading-matrix").style.display = "flex";
-    
-    const tickers = ["QQQ", "QLD", "TLT", "GLD", "UUP", "SGOV", "SPY"];
-    try {
-        await Promise.all(tickers.map(async (ticker) => {
-            const prices = await fetchYahooData(ticker);
-            if(prices && prices.length > 0) cachedPrices[ticker] = prices;
-        }));
-        
-        // 解析最新數據並自動寫入控制面板
-        const qqqPrices = cachedPrices["QQQ"];
-        const spyPrices = cachedPrices["SPY"];
-        if(qqqPrices && qqqPrices.length > 200) {
-            const currentQQQ = qqqPrices[qqqPrices.length - 1];
-            const ma200QQQ = mean(qqqPrices.slice(-200));
-            
-            document.getElementById("param-qqq-price").value = currentQQQ.toFixed(2);
-            document.getElementById("param-ma200").value = ma200QQQ.toFixed(2);
-            
-            const currentSPY = spyPrices[spyPrices.length - 1];
-            const maxSPY = Math.max(...spyPrices);
-            const ddSPY = ((currentSPY - maxSPY) / maxSPY) * 100;
-            document.getElementById("spy-dd").innerText = ddSPY.toFixed(2) + "%";
-        }
-    } catch (e) {
-        console.error("API 連線異常，自動切換至手動安全備用機制", e);
-    } finally {
-        document.getElementById("loading-sim").style.display = "none";
-        document.getElementById("loading-matrix").style.display = "none";
-        runSystemCore();
-    }
-}
+let benchmark = "QQQ";
+let windowSize = 21;
 
-function toggleEngineMode() {
-    const mode = document.getElementById("engine-mode").value;
-    if (mode === "api") {
-        triggerAutoSync();
-    } else {
-        runSystemCore();
-    }
-}
+let currentAllocation = {};
 
-// ==========================================
-// 4. 戰情室中央決策運算核心 (核心引擎)
-// ==========================================
-function runSystemCore() {
-    const mode = document.getElementById("engine-mode").value;
-    const benchmark = document.getElementById("benchmark-select").value;
-    const windowSize = parseInt(document.getElementById("window-select").value);
-
-    // 讀取/處理控制面板數值
-    let qqqPrice = parseFloat(document.getElementById("param-qqq-price").value);
-    let ma200Price = parseFloat(document.getElementById("param-ma200").value);
-    const kValue = parseFloat(document.getElementById("param-k").value);
-    const threshold = parseFloat(document.getElementById("param-threshold").value);
-
-    // 更新控制面板數值顯示
-    document.getElementById("v-qqq-price").innerText = qqqPrice.toFixed(2);
-    document.getElementById("v-qqq-ma200").innerText = ma200Price.toFixed(2);
-    document.getElementById("v-k-value").innerText = kValue.toFixed(3);
-    document.getElementById("v-threshold").innerText = threshold.toFixed(1) + "%";
-
-    const cutoffLine = ma200Price * 0.97;
-    document.getElementById("display-cutoff").innerText = cutoffLine.toFixed(2);
-    
-    const ratio = qqqPrice / ma200Price;
-    document.getElementById("qqq-price").innerText = qqqPrice.toFixed(2);
-    document.getElementById("qqq-ma200").innerText = ma200Price.toFixed(2);
-    document.getElementById("market-status").innerText = ratio.toFixed(3);
-
-    // 判斷多空 Regime 
-    const regimeBox = document.getElementById("regime-box");
-    let isBull = true;
-
-    if (qqqPrice >= ma200Price) {
-        regimeBox.className = "regime-box bull-box";
-        regimeBox.innerText = "核心進攻模式 (Regime: Bull)";
-        isBull = true;
-    } else if (qqqPrice < ma200Price && qqqPrice >= cutoffLine) {
-        regimeBox.className = "regime-box neutral-box";
-        regimeBox.innerText = "多頭破位警戒區 (Whipsaw Filter)";
-        isBull = true; 
-    } else {
-        regimeBox.className = "regime-box bear-box";
-        regimeBox.innerText = "熊市全面防禦 (冬眠啟動)";
-        isBull = false; 
-    }
-
-    // 計算目標權重 (SGOV 扮演絕對資金海綿池)
-    const base = isBull ? bullBase : bearBase;
-    let targets = {};
-    targets.QQQ = base.QQQ * kValue;
-    targets.QLD = isBull ? (base.QLD * kValue) : 0.0; 
-    targets.TLT = base.TLT * kValue;
-    targets.GLD = base.GLD * kValue;
-    targets.UUP = base.UUP * kValue;
-    const allocatedSum = targets.QQQ + targets.QLD + targets.TLT + targets.GLD + targets.UUP;
-    targets.SGOV = Math.max(0, 100.0 - allocatedSum);
-
-    // 渲染 Module 3: Dynamic Allocation & Trade Action 交易配置表
-    const allocTbody = document.getElementById("allocation-table-body");
-    allocTbody.innerHTML = '';
-
-    ["QQQ", "QLD", "TLT", "GLD", "UUP", "SGOV"].forEach(asset => {
-        const cur = currentWeights[asset];
-        const tgt = targets[asset];
-        const diff = tgt - cur;
-
-        let actionText = "HOLD";
-        let actionClass = "badge-action badge-hold";
-
-        if (diff >= threshold) { actionText = "BUY"; actionClass = "badge-action badge-buy"; } 
-        else if (diff <= -threshold) { actionText = "SELL"; actionClass = "badge-action badge-sell"; }
-
-        if (!isBull && asset === "QLD" && cur > 0) { actionText = "CRITICAL SELL"; actionClass = "badge-action badge-critical"; }
-
-        const tr = document.createElement("tr");
-        if (asset === "SGOV") tr.style.background = "rgba(56, 189, 248, 0.04)";
-
-        tr.innerHTML = `
-            <td style="font-weight: bold; text-align: left; padding-left: 20px;">${asset} <span style="font-weight: normal; color:#64748b; font-size:12px; margin-left:10px;">${assetRoles[asset]}</span></td>
-            <td class="font-mono">${cur.toFixed(2)}%</td>
-            <td class="font-mono" style="color:#fff; font-weight: bold;">${tgt.toFixed(2)}%</td>
-            <td class="font-mono" style="color: ${diff >= 0 ? '#22c55e' : '#ef4444'}">${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%</td>
-            <td>${threshold.toFixed(1)}%</td>
-            <td><span class="${actionClass}">${actionText}</span></td>
-        `;
-        allocTbody.appendChild(tr);
-    });
-
-    // ==========================================
-    // 5. 動態矩陣數學運算 (對標商品與週期連動)
-    // ==========================================
-    const matrixTbody = document.getElementById("matrix-table-body");
-    const rcTbody = document.getElementById("rc-table-body");
-    
-    // 檢查快取內是否有足夠的歷史回測報酬率陣列
-    const hasFullAPIData = cachedPrices[benchmark] && cachedPrices["QLD"] && cachedPrices["TLT"] && cachedPrices["GLD"] && cachedPrices["UUP"] && cachedPrices["SGOV"];
-
-    let pBeta = 0;
-    let pVol = 0;
-    let assetVolatilities = {};
-    let assetBetas = {};
-    let assetCorrelations = {};
-
-    if (mode === "api" && hasFullAPIData) {
-        // 【實時量化運算】
-        const benchRet = calcReturns(cachedPrices[benchmark]);
-        matrixTbody.innerHTML = "";
-
-        // 計算各個資產動態指標
-        ["QQQ", "QLD", "TLT", "GLD", "UUP", "SGOV"].forEach(asset => {
-            const assetRet = calcReturns(cachedPrices[asset]);
-            const minLen = Math.min(benchRet.length, assetRet.length, windowSize);
-            
-            const bSlice = benchRet.slice(-minLen);
-            const aSlice = assetRet.slice(-minLen);
-
-            const corr = correlation(aSlice, bSlice);
-            const beta = calcBeta(aSlice, bSlice);
-            const vol = std(aSlice) * Math.sqrt(252); // 年化波動率
-
-            assetCorrelations[asset] = corr;
-            assetBetas[asset] = beta;
-            assetVolatilities[asset] = vol;
-
-            // 僅在矩陣表顯示非基準資產 (如原版設計)
-            if (asset !== "QQQ" || benchmark !== "QQQ") {
-                const corrColor = corr > 0.4 ? "green" : (corr < -0.1 ? "red" : "yellow");
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td style="font-weight:bold;">${asset}</td>
-                    <td style="color:#94a3b8; font-size:12px;">${assetRoles[asset]}</td>
-                    <td class="${corrColor} font-mono">${corr.toFixed(2)}</td>
-                    <td class="font-mono">${beta.toFixed(2)}</td>
-                `;
-                matrixTbody.appendChild(tr);
-            }
-        });
-
-        // 運算投資組合總風險 (Portfolio Return Series Volatility)
-        const totalPeriods = calcReturns(cachedPrices["QQQ"]).length;
-        const testLen = Math.min(totalPeriods, windowSize);
-        let pReturnSeries = new Array(testLen).fill(0);
-
-        ["QQQ", "QLD", "TLT", "GLD", "UUP", "SGOV"].forEach(asset => {
-            const assetRet = calcReturns(cachedPrices[asset]).slice(-testLen);
-            const weight = targets[asset] / 100;
-            for(let t=0; t<testLen; t++) {
-                pReturnSeries[t] += (assetRet[t] || 0) * weight;
-            }
-            pBeta += assetBetas[asset] * weight;
-        });
-
-        pVol = std(pReturnSeries) * Math.sqrt(252);
-
-        // 渲染 Module 6: Risk Contribution (風險邊際佔比)
-        rcTbody.innerHTML = "";
-        let totalWeightedVol = 0;
-        let riskContributions = {};
-        
-        ["QQQ", "QLD", "TLT", "GLD", "UUP", "SGOV"].forEach(asset => {
-            const weight = targets[asset] / 100;
-            const assetRet = calcReturns(cachedPrices[asset]).slice(-testLen);
-            const covAssetPortfolio = covariance(assetRet, pReturnSeries);
-            // 邊際風險貢獻度公式
-            riskContributions[asset] = pVol === 0 ? 0 : (weight * covAssetPortfolio * 252) / pVol;
-            totalWeightedVol += riskContributions[asset];
-        });
-
-        ["QQQ", "QLD", "TLT", "GLD", "UUP", "SGOV"].forEach(asset => {
-            const rcPercent = totalWeightedVol === 0 ? 0 : (riskContributions[asset] / totalWeightedVol) * 100;
-            const tr = document.createElement("tr");
-            tr.innerHTML = `<td><b>${asset}</b> <span style="font-weight:normal; color:#64748b; font-size:11px; margin-left:8px;">${assetRoles[asset]}</span></td><td class="font-mono">${Math.max(0, rcPercent).toFixed(1)}%</td>`;
-            rcTbody.appendChild(tr);
-        });
-
-    } else {
-        // 【手動模擬備用引擎】(防 API 阻擋或限流之靜態安全回歸)
-        matrixTbody.innerHTML = `
-            <tr><td>QLD</td><td>${assetRoles.QLD}</td><td class="green font-mono">${benchmark==='QQQ'?'0.99':'0.88'}</td><td class="font-mono">${benchmark==='QQQ'?'1.98':'1.72'}</td></tr>
-            <tr><td>TLT</td><td>${assetRoles.TLT}</td><td class="red font-mono">-0.35</td><td class="font-mono">-0.15</td></tr>
-            <tr><td>GLD</td><td>${assetRoles.GLD}</td><td class="yellow font-mono">0.12</td><td class="font-mono">0.02</td></tr>
-            <tr><td>UUP</td><td>${assetRoles.UUP}</td><td class="red font-mono">-0.22</td><td class="font-mono">-0.05</td></tr>
-            <tr><td>SGOV</td><td>${assetRoles.SGOV}</td><td class="font-mono">0.01</td><td class="font-mono">0.00</td></tr>
-        `;
-        pVol = isBull ? 0.1582 : 0.0579;
-        pBeta = benchmark === "QQQ" ? (isBull ? 1.08 : 0.17) : (isBull ? 0.95 : 0.12);
-
-        rcTbody.innerHTML = `
-            <tr><td>QQQ</td><td class="font-mono">${isBull?'22.4%':'35.2%'}</td></tr>
-            <tr><td>QLD</td><td class="font-mono" style="color:#ef4444; font-weight:bold;">${isBull?'68.1%':'0.0%'}</td></tr>
-            <tr><td>TLT</td><td class="font-mono">${isBull?'4.2%':'18.5%'}</td></tr>
-            <tr><td>GLD</td><td class="font-mono">${isBull?'3.8%':'15.1%'}</td></tr>
-            <tr><td>UUP</td><td class="font-mono">${isBull?'1.5%':'31.2%'}</td></tr>
-            <tr><td>SGOV</td><td class="font-mono">0.0%</td></tr>
-        `;
-    }
-
-    // 更新 Module 5: Portfolio Risk Engine 總體指標
-    document.getElementById("portfolio-vol").innerText = (pVol * 100).toFixed(2) + "%";
-    document.getElementById("portfolio-beta").innerText = pBeta.toFixed(2);
-    
-    const statusEl = document.getElementById("risk-status");
-    if (pBeta > 0.70) {
-        statusEl.innerHTML = '<span class="risk-on">槓桿效率優異 (RISK ON)</span>';
-    } else {
-        statusEl.innerHTML = '<span class="risk-off">冬眠主動避險 (RISK OFF)</span>';
-    }
-
-    // ==========================================
-    // 6. 多因子驗證 Regime Score 給分引擎
-    // ==========================================
-    let score = 0;
-    const s_ma200 = qqqPrice > ma200Price ? 1 : -1;
-    const s_ma50 = cachedPrices["QQQ"] && cachedPrices["QQQ"].length > 50 ? (qqqPrice > mean(cachedPrices["QQQ"].slice(-50)) ? 1 : -1) : (isBull ? 1 : -1);
-    const s_dd = (document.getElementById("spy-dd").innerText.replace('%','') * 1) > -10 ? 1 : -1;
-    
-    const s_tlt = isBull ? 1 : -1; 
-    const s_uup = isBull ? 1 : -1;
-
-    score = s_ma200 + s_ma50 + s_dd + s_tlt + s_uup;
-
-    document.getElementById("score-ma200").innerHTML = s_ma200 > 0 ? '<span class="green">+1</span>' : '<span class="red">-1</span>';
-    document.getElementById("score-ma50").innerHTML = s_ma50 > 0 ? '<span class="green">+1</span>' : '<span class="red">-1</span>';
-    document.getElementById("score-dd").innerHTML = s_dd > 0 ? '<span class="green">+1</span>' : '<span class="red">-1</span>';
-    document.getElementById("score-tlt").innerHTML = s_tlt > 0 ? '<span class="green">Risk On (+1)</span>' : '<span class="yellow">Risk Off (-1)</span>';
-    document.getElementById("score-uup").innerHTML = s_uup > 0 ? '<span class="green">Liquidity OK (+1)</span>' : '<span class="red">Dollar Strong (-1)</span>';
-    
-    document.getElementById("regime-score-total").innerText = score;
-
-    const finalBox = document.getElementById("regime-final-box");
-    if(score >= 3) { finalBox.className = "regime-box bull-box"; finalBox.innerText = "Strong Bull Regime"; }
-    else if(score >= 1) { finalBox.className = "regime-box bull-box"; finalBox.innerText = "Bull Regime"; }
-    else if(score >= -1) { finalBox.className = "regime-box neutral-box"; finalBox.innerText = "Neutral Regime"; }
-    else { finalBox.className = "regime-box bear-box"; finalBox.innerText = "Bear / Crisis Regime"; }
-}
-
-// 初始化啟動
-window.onload = () => {
-    triggerAutoSync(); // 預設開啟即自動同步真實多資產數據矩陣
+const bullBase = {
+QQQ:26,
+QLD:32,
+TLT:7,
+GLD:7,
+UUP:9,
+SGOV:19
 };
+
+const bearBase = {
+QQQ:20,
+QLD:20,
+TLT:10,
+GLD:10,
+UUP:20,
+SGOV:20
+};
+
+async function fetchPrices(symbol){
+
+if(cachedPrices[symbol]){
+return cachedPrices[symbol];
+}
+
+try{
+
+const url =
+`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=250&apikey=${API_KEY}`;
+
+const response = await fetch(url);
+
+const data = await response.json();
+
+if(!data.values){
+return [];
+}
+
+const prices =
+data.values
+.map(v => parseFloat(v.close))
+.reverse();
+
+cachedPrices[symbol] = prices;
+
+return prices;
+
+}catch(error){
+
+console.log(symbol,error);
+
+return [];
+
+}
+
+}
+
+function mean(arr){
+
+if(arr.length===0) return 0;
+
+return arr.reduce((a,b)=>a+b,0)/arr.length;
+
+}
+
+function std(arr){
+
+if(arr.length<2) return 0;
+
+const avg = mean(arr);
+
+const squareDiffs =
+arr.map(v => Math.pow(v-avg,2));
+
+return Math.sqrt(mean(squareDiffs));
+
+}
+
+function covariance(a,b){
+
+if(a.length===0 || b.length===0){
+return 0;
+}
+
+const avgA = mean(a);
+const avgB = mean(b);
+
+let sum = 0;
+
+for(let i=0;i<a.length;i++){
+
+sum +=
+(a[i]-avgA)*(b[i]-avgB);
+
+}
+
+return sum/a.length;
+
+}
+
+function correlation(a,b){
+
+const cov =
+covariance(a,b);
+
+const stdA =
+std(a);
+
+const stdB =
+std(b);
+
+if(stdA===0 || stdB===0){
+return 0;
+}
+
+const corr =
+cov / (stdA*stdB);
+
+if(!isFinite(corr)){
+return 0;
+}
+
+return corr;
+
+}
+
+function calcReturns(prices){
+
+let arr = [];
+
+for(let i=1;i<prices.length;i++){
+
+const r =
+(prices[i]-prices[i-1])/prices[i-1];
+
+if(isFinite(r)){
+arr.push(r);
+}
+
+}
+
+return arr;
+
+}
+
+function calcBeta(assetReturns,benchmarkReturns){
+
+const cov =
+covariance(assetReturns,benchmarkReturns);
+
+const benchmarkStd =
+std(benchmarkReturns);
+
+const benchmarkVar =
+benchmarkStd * benchmarkStd;
+
+if(benchmarkVar===0){
+return 0;
+}
+
+const beta =
+cov/benchmarkVar;
+
+if(!isFinite(beta)){
+return 0;
+}
+
+return beta;
+
+}
+
+async function updateRegime(){
+
+const qqqPrices =
+cachedPrices["QQQ"];
+
+const spyPrices =
+cachedPrices["SPY"];
+
+const qqq =
+qqqPrices[qqqPrices.length-1];
+
+const ma200 =
+mean(qqqPrices.slice(-200));
+
+const spy =
+spyPrices[spyPrices.length-1];
+
+const spyHigh =
+Math.max(...spyPrices);
+
+const drawdown =
+((spy-spyHigh)/spyHigh)*100;
+
+document.getElementById("qqq-price")
+.innerText = qqq.toFixed(2);
+
+document.getElementById("qqq-ma200")
+.innerText = ma200.toFixed(2);
+
+document.getElementById("spy-dd")
+.innerText = drawdown.toFixed(1)+"%";
+
+if(qqq > ma200){
+
+currentAllocation = {...bullBase};
+
+document.getElementById("market-status")
+.innerText = "Bull Market";
+
+document.getElementById("regime-box")
+.className = "regime-box bull-box";
+
+document.getElementById("regime-box")
+.innerText = "Bull Market";
+
+}else{
+
+currentAllocation = {...bearBase};
+
+document.getElementById("market-status")
+.innerText = "Bear Market";
+
+document.getElementById("regime-box")
+.className = "regime-box bear-box";
+
+document.getElementById("regime-box")
+.innerText = "Bear Market";
+
+}
+
+document.getElementById("w-qqq").innerText = currentAllocation.QQQ+"%";
+document.getElementById("w-qld").innerText = currentAllocation.QLD+"%";
+document.getElementById("w-tlt").innerText = currentAllocation.TLT+"%";
+document.getElementById("w-gld").innerText = currentAllocation.GLD+"%";
+document.getElementById("w-uup").innerText = currentAllocation.UUP+"%";
+document.getElementById("w-sgov").innerText = currentAllocation.SGOV+"%";
+
+}
+
+async function updateRollingBeta(){
+
+const benchmarkPrices =
+cachedPrices[benchmark];
+
+const benchmarkReturns =
+calcReturns(benchmarkPrices);
+
+for(let i=1;i<assets.length;i++){
+
+const asset = assets[i];
+
+const prices =
+cachedPrices[asset];
+
+const returns =
+calcReturns(prices);
+
+const minLen =
+Math.min(
+returns.length,
+benchmarkReturns.length,
+windowSize
+);
+
+const beta =
+calcBeta(
+returns.slice(-minLen),
+benchmarkReturns.slice(-minLen)
+);
+
+document.getElementById(
+"beta-"+asset.toLowerCase()
+).innerText =
+beta.toFixed(2);
+
+}
+
+}
+
+async function updateCorrelationMatrix(){
+
+const benchmarkPrices =
+cachedPrices[benchmark];
+
+const benchmarkReturns =
+calcReturns(benchmarkPrices);
+
+for(let i=1;i<assets.length;i++){
+
+const asset = assets[i];
+
+const prices =
+cachedPrices[asset];
+
+const returns =
+calcReturns(prices);
+
+const minLen =
+Math.min(
+returns.length,
+benchmarkReturns.length,
+windowSize
+);
+
+const corr =
+correlation(
+returns.slice(-minLen),
+benchmarkReturns.slice(-minLen)
+);
+
+document.getElementById(
+"corr-"+asset.toLowerCase()
+).innerText =
+corr.toFixed(2);
+
+}
+
+}
+
+async function updatePortfolioRisk(){
+
+const benchmarkPrices =
+cachedPrices[benchmark];
+
+const benchmarkReturns =
+calcReturns(benchmarkPrices);
+
+let portfolioBeta = 0;
+let portfolioVol = 0;
+
+const volData = {};
+
+for(let asset of assets){
+
+const prices =
+cachedPrices[asset];
+
+const returns =
+calcReturns(prices);
+
+const minLen =
+Math.min(
+returns.length,
+benchmarkReturns.length,
+windowSize
+);
+
+const assetReturns =
+returns.slice(-minLen);
+
+const benchmarkSlice =
+benchmarkReturns.slice(-minLen);
+
+const beta =
+calcBeta(assetReturns,benchmarkSlice);
+
+const vol =
+std(assetReturns)*Math.sqrt(252);
+
+const weight =
+(currentAllocation[asset]||0)/100;
+
+portfolioBeta +=
+beta * weight;
+
+portfolioVol +=
+vol * weight;
+
+volData[asset] =
+vol * weight;
+
+}
+
+document.getElementById("portfolio-beta")
+.innerText =
+portfolioBeta.toFixed(2);
+
+document.getElementById("portfolio-vol")
+.innerText =
+(portfolioVol*100).toFixed(1)+"%";
+
+if(portfolioBeta > 0.8){
+
+document.getElementById("risk-status")
+.innerHTML =
+'<span class="risk-on">風險開啟</span>';
+
+}else{
+
+document.getElementById("risk-status")
+.innerHTML =
+'<span class="risk-off">風險防禦</span>';
+
+}
+
+const totalRisk =
+Object.values(volData)
+.reduce((a,b)=>a+b,0);
+
+for(let asset of assets){
+
+const rc =
+((volData[asset]||0)/totalRisk)*100;
+
+document.getElementById(
+"rc-"+asset.toLowerCase()
+).innerText =
+isFinite(rc)
+? rc.toFixed(1)+"%"
+: "0.0%";
+
+}
+
+}
+
+async function updateRegimeScore(){
+
+const qqqPrices =
+cachedPrices["QQQ"];
+
+const spyPrices =
+cachedPrices["SPY"];
+
+const tltPrices =
+cachedPrices["TLT"];
+
+const uupPrices =
+cachedPrices["UUP"];
+
+const qqq =
+qqqPrices[qqqPrices.length-1];
+
+const ma50 =
+mean(qqqPrices.slice(-50));
+
+const ma200 =
+mean(qqqPrices.slice(-200));
+
+const spy =
+spyPrices[spyPrices.length-1];
+
+const spyHigh =
+Math.max(...spyPrices);
+
+const drawdown =
+((spy-spyHigh)/spyHigh)*100;
+
+const tlt =
+tltPrices[tltPrices.length-1];
+
+const tltMA50 =
+mean(tltPrices.slice(-50));
+
+const uup =
+uupPrices[uupPrices.length-1];
+
+const uupMA50 =
+mean(uupPrices.slice(-50));
+
+let score = 0;
+
+if(qqq > ma200){
+
+score += 1;
+
+document.getElementById("score-ma200")
+.innerHTML =
+'<span class="green">+1</span>';
+
+}else{
+
+score -= 1;
+
+document.getElementById("score-ma200")
+.innerHTML =
+'<span class="red">-1</span>';
+
+}
+
+if(qqq > ma50){
+
+score += 1;
+
+document.getElementById("score-ma50")
+.innerHTML =
+'<span class="green">+1</span>';
+
+}else{
+
+score -= 1;
+
+document.getElementById("score-ma50")
+.innerHTML =
+'<span class="red">-1</span>';
+
+}
+
+if(drawdown > -10){
+
+score += 1;
+
+document.getElementById("score-dd")
+.innerHTML =
+'<span class="green">+1</span>';
+
+}else{
+
+score -= 1;
+
+document.getElementById("score-dd")
+.innerHTML =
+'<span class="red">-1</span>';
+
+}
+
+if(tlt > tltMA50){
+
+score -= 1;
+
+document.getElementById("score-tlt")
+.innerHTML =
+'<span class="yellow">Risk Off</span>';
+
+}else{
+
+score += 1;
+
+document.getElementById("score-tlt")
+.innerHTML =
+'<span class="green">Risk On</span>';
+
+}
+
+if(uup > uupMA50){
+
+score -= 1;
+
+document.getElementById("score-uup")
+.innerHTML =
+'<span class="yellow">Dollar Strong</span>';
+
+}else{
+
+score += 1;
+
+document.getElementById("score-uup")
+.innerHTML =
+'<span class="green">Liquidity OK</span>';
+
+}
+
+document.getElementById("regime-score-total")
+.innerText = score;
+
+if(score >= 3){
+
+document.getElementById("regime-final-box")
+.className =
+"regime-box bull-box";
+
+document.getElementById("regime-final-box")
+.innerText =
+"Strong Bull Regime";
+
+}else if(score >= 1){
+
+document.getElementById("regime-final-box")
+.className =
+"regime-box bull-box";
+
+document.getElementById("regime-final-box")
+.innerText =
+"Bull Regime";
+
+}else if(score >= -1){
+
+document.getElementById("regime-final-box")
+.className =
+"regime-box neutral-box";
+
+document.getElementById("regime-final-box")
+.innerText =
+"Neutral Regime";
+
+}else{
+
+document.getElementById("regime-final-box")
+.className =
+"regime-box bear-box";
+
+document.getElementById("regime-final-box")
+.innerText =
+"Bear / Crisis Regime";
+
+}
+
+}
+
+document
+.getElementById("benchmark-select")
+.addEventListener("change",(e)=>{
+
+benchmark = e.target.value;
+
+init();
+
+});
+
+document
+.getElementById("window-select")
+.addEventListener("change",(e)=>{
+
+windowSize =
+parseInt(e.target.value);
+
+init();
+
+});
+
+async function init(){
+
+cachedPrices = {};
+
+await Promise.all([
+fetchPrices("QQQ"),
+fetchPrices("QLD"),
+fetchPrices("TLT"),
+fetchPrices("GLD"),
+fetchPrices("UUP"),
+fetchPrices("SGOV"),
+fetchPrices("SPY")
+]);
+
+await updateRegime();
+
+await updateRollingBeta();
+
+await updateCorrelationMatrix();
+
+await updatePortfolioRisk();
+
+await updateRegimeScore();
+
+console.log("V6 System Ready");
+
+}
+
+window.onload = () => {
+
+init();
+
+};
+
 </script>
+
 </body>
 </html>
