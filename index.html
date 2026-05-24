@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
 <title>Pure Alpha 戰情室 V4</title>
@@ -28,9 +28,9 @@ body{
 }
 
 h1{
-  font-size:40px;
-  color:white;
+  font-size:42px;
   margin-bottom:10px;
+  color:white;
 }
 
 .subtitle{
@@ -54,7 +54,6 @@ h1{
 .card h2{
   color:#38bdf8;
   margin-bottom:20px;
-  font-size:24px;
 }
 
 .metric{
@@ -89,10 +88,6 @@ h1{
   color:#facc15;
 }
 
-.blue{
-  color:#38bdf8;
-}
-
 table{
   width:100%;
   border-collapse:collapse;
@@ -106,13 +101,6 @@ th,td{
 
 th{
   background:#334155;
-  color:white;
-}
-
-.footer{
-  margin-top:40px;
-  text-align:center;
-  color:#94a3b8;
 }
 
 select{
@@ -124,11 +112,11 @@ select{
 }
 
 .regime-box{
+  margin-top:20px;
   padding:20px;
   border-radius:16px;
-  margin-top:20px;
   text-align:center;
-  font-size:22px;
+  font-size:24px;
   font-weight:bold;
 }
 
@@ -144,10 +132,10 @@ select{
   color:#ef4444;
 }
 
-.defense-box{
-  background:rgba(250,204,21,0.15);
-  border:2px solid #facc15;
-  color:#facc15;
+.footer{
+  margin-top:40px;
+  text-align:center;
+  color:#94a3b8;
 }
 
 </style>
@@ -172,12 +160,12 @@ Regime Engine × Dynamic Allocation × Rolling Beta × Tactical Overlay
 
 <div class="metric">
 <span class="label">QQQ 現價</span>
-<span id="qqq-price" class="value">Loading...</span>
+<span id="qqq-price" class="value yellow">Loading...</span>
 </div>
 
 <div class="metric">
 <span class="label">QQQ MA200</span>
-<span id="qqq-ma200" class="value">Loading...</span>
+<span id="qqq-ma200" class="value yellow">Loading...</span>
 </div>
 
 <div class="metric">
@@ -196,53 +184,28 @@ Loading...
 
 </div>
 
-<!-- Dynamic Allocation -->
+<!-- Allocation -->
 <div class="card">
 
 <h2>Dynamic Allocation Engine</h2>
 
-<table id="allocation-table">
+<table>
 
 <thead>
-
 <tr>
 <th>資產</th>
 <th>目前權重</th>
 </tr>
-
 </thead>
 
 <tbody>
 
-<tr>
-<td>QQQ</td>
-<td id="w-qqq">-</td>
-</tr>
-
-<tr>
-<td>QLD</td>
-<td id="w-qld">-</td>
-</tr>
-
-<tr>
-<td>TLT</td>
-<td id="w-tlt">-</td>
-</tr>
-
-<tr>
-<td>GLD</td>
-<td id="w-gld">-</td>
-</tr>
-
-<tr>
-<td>UUP</td>
-<td id="w-uup">-</td>
-</tr>
-
-<tr>
-<td>SGOV</td>
-<td id="w-sgov">-</td>
-</tr>
+<tr><td>QQQ</td><td id="w-qqq">-</td></tr>
+<tr><td>QLD</td><td id="w-qld">-</td></tr>
+<tr><td>TLT</td><td id="w-tlt">-</td></tr>
+<tr><td>GLD</td><td id="w-gld">-</td></tr>
+<tr><td>UUP</td><td id="w-uup">-</td></tr>
+<tr><td>SGOV</td><td id="w-sgov">-</td></tr>
 
 </tbody>
 
@@ -279,12 +242,10 @@ Benchmark：
 <table id="beta-table">
 
 <thead>
-
 <tr>
 <th>資產</th>
 <th>Rolling Beta</th>
 </tr>
-
 </thead>
 
 <tbody>
@@ -301,7 +262,7 @@ Benchmark：
 
 </div>
 
-<!-- Tactical Overlay -->
+<!-- Overlay -->
 <div class="card">
 
 <h2>戰術 Overlay</h2>
@@ -331,58 +292,50 @@ Benchmark：
 </div>
 
 <div class="footer">
-
-Pure Alpha 多資產動態戰情室 V4
-
+Pure Alpha 多資產戰情室 V4
 </div>
 
 </div>
 
 <script>
 
-const API_KEY = "YOUR_TWELVE_DATA_KEY";
+const API_KEY = "b286e5ff15bc4cf8a2eb07d873e3ed3a";
 
 const assets = ["QLD","TLT","GLD","UUP","SGOV"];
 
 let benchmark = "QQQ";
 let windowSize = 21;
 
-// Base Allocation
 const bullBase = {
-
   QQQ:26,
   QLD:32,
   TLT:7,
   GLD:7,
   UUP:9,
   SGOV:19
-
 };
 
 const bearBase = {
-
   QQQ:20,
   QLD:20,
   TLT:10,
   GLD:10,
   UUP:20,
   SGOV:20
-
 };
 
-// 抓價格
 async function fetchPrices(symbol){
 
   const url =
-  `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=250&apikey=${API_KEY}`;
+  `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=220&apikey=${API_KEY}`;
 
   const response = await fetch(url);
 
   const data = await response.json();
 
-  if(!data.values){
+  console.log(symbol,data);
 
-    console.log(symbol,data);
+  if(!data.values){
 
     return [];
 
@@ -394,7 +347,6 @@ async function fetchPrices(symbol){
 
 }
 
-// Return
 function calcReturns(prices){
 
   let arr = [];
@@ -411,14 +363,12 @@ function calcReturns(prices){
 
 }
 
-// Mean
 function mean(arr){
 
   return arr.reduce((a,b)=>a+b,0)/arr.length;
 
 }
 
-// Covariance
 function covariance(a,b){
 
   const avgA = mean(a);
@@ -437,7 +387,6 @@ function covariance(a,b){
 
 }
 
-// Variance
 function variance(arr){
 
   const avg = mean(arr);
@@ -454,7 +403,6 @@ function variance(arr){
 
 }
 
-// Beta
 function calcBeta(assetReturns, benchmarkReturns){
 
   const cov =
@@ -471,7 +419,7 @@ function calcBeta(assetReturns, benchmarkReturns){
 
   const beta = cov / vari;
 
-  if(!isFinite(beta) || isNaN(beta)){
+  if(isNaN(beta) || !isFinite(beta)){
 
     return 0;
 
@@ -481,7 +429,6 @@ function calcBeta(assetReturns, benchmarkReturns){
 
 }
 
-// Rolling Beta
 async function updateRollingBeta(){
 
   const benchmarkPrices =
@@ -529,8 +476,9 @@ async function updateRollingBeta(){
 
 }
 
-// 更新 Regime
 async function updateRegime(){
+
+  console.log("updateRegime start");
 
   const qqqPrices =
     await fetchPrices("QQQ");
@@ -538,23 +486,43 @@ async function updateRegime(){
   const spyPrices =
     await fetchPrices("SPY");
 
+  console.log("QQQ length:",qqqPrices.length);
+
+  if(qqqPrices.length === 0){
+
+    return;
+
+  }
+
   const qqq =
     qqqPrices[qqqPrices.length-1];
 
-  const ma200 =
-    qqqPrices.slice(-200)
-    .reduce((a,b)=>a+b,0)/200;
+  let ma200 = 0;
+
+  if(qqqPrices.length >= 200){
+
+    ma200 =
+      qqqPrices
+      .slice(-200)
+      .reduce((a,b)=>a+b,0)/200;
+
+  }else{
+
+    ma200 =
+      qqqPrices
+      .reduce((a,b)=>a+b,0)/qqqPrices.length;
+
+  }
 
   const spy =
     spyPrices[spyPrices.length-1];
 
   const spyHigh =
-    Math.max(...spyPrices);
+    Math.max(...spyPrices.filter(v=>!isNaN(v)));
 
   const drawdown =
     ((spy-spyHigh)/spyHigh)*100;
 
-  // 顯示
   document.getElementById("qqq-price")
     .innerText = qqq.toFixed(2);
 
@@ -564,7 +532,6 @@ async function updateRegime(){
   document.getElementById("spy-dd")
     .innerText = drawdown.toFixed(1)+"%";
 
-  // Regime 判定
   let regime = "";
   let regimeClass = "";
 
@@ -592,7 +559,6 @@ async function updateRegime(){
 
   }
 
-  // QLD Overlay
   if(qqqBelow97){
 
     alloc.SGOV += alloc.QLD;
@@ -608,7 +574,6 @@ async function updateRegime(){
 
   }
 
-  // Drawdown Overlay
   if(drawdown <= -10){
 
     alloc.QLD += 5;
@@ -639,7 +604,6 @@ async function updateRegime(){
 
   }
 
-  // 更新 Allocation
   document.getElementById("w-qqq")
     .innerText = alloc.QQQ+"%";
 
@@ -672,7 +636,6 @@ async function updateRegime(){
 
 }
 
-// Dropdown
 document
 .getElementById("benchmark-select")
 .addEventListener("change",(e)=>{
@@ -694,7 +657,6 @@ document
 
 });
 
-// 啟動
 updateRollingBeta();
 updateRegime();
 
