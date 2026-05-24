@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -155,12 +156,12 @@ select{
 <h1>Pure Alpha 戰情室 V5</h1>
 
 <div class="subtitle">
-Portfolio Risk Engine × Dynamic Allocation × Rolling Beta × Tactical Overlay
+多資產風險系統 × Dynamic Allocation × Rolling Beta × Tactical Overlay
 </div>
 
 <div class="grid">
 
-<!-- Regime -->
+<!-- 市場 Regime -->
 <div class="card">
 
 <h2>市場 Regime Engine</h2>
@@ -176,7 +177,7 @@ Portfolio Risk Engine × Dynamic Allocation × Rolling Beta × Tactical Overlay
 </div>
 
 <div class="metric">
-<span class="label">SPY Drawdown</span>
+<span class="label">SPY 回撤幅度</span>
 <span id="spy-dd" class="value yellow">Loading...</span>
 </div>
 
@@ -191,7 +192,7 @@ Loading...
 
 </div>
 
-<!-- Allocation -->
+<!-- 動態配置 -->
 <div class="card">
 
 <h2>Dynamic Allocation Engine</h2>
@@ -275,22 +276,22 @@ Benchmark：
 <h2>Portfolio Risk Engine</h2>
 
 <div class="metric">
-<span class="label">Portfolio Volatility</span>
+<span class="label">投資組合波動率</span>
 <span id="portfolio-vol" class="value">Loading...</span>
 </div>
 
 <div class="metric">
-<span class="label">Portfolio Beta</span>
+<span class="label">投資組合 Beta</span>
 <span id="portfolio-beta" class="value">Loading...</span>
 </div>
 
 <div class="metric">
-<span class="label">Risk Status</span>
+<span class="label">風險狀態</span>
 <span id="risk-status" class="value">Loading...</span>
 </div>
 
 <div class="metric">
-<span class="label">Max Drawdown</span>
+<span class="label">最大回撤控制</span>
 <span id="max-dd" class="value red">-35%</span>
 </div>
 
@@ -325,7 +326,7 @@ Benchmark：
 
 </div>
 
-<!-- Overlay -->
+<!-- Tactical Overlay -->
 <div class="card">
 
 <h2>戰術 Overlay</h2>
@@ -355,7 +356,7 @@ Benchmark：
 </div>
 
 <div class="footer">
-Pure Alpha Multi-Asset Risk Operating System V5
+Pure Alpha 多資產風險作戰系統 V5
 </div>
 
 </div>
@@ -408,27 +409,21 @@ return data.values
 
 }
 
-function calcReturns(prices){
-
-let arr = [];
-
-for(let i=1;i<prices.length;i++){
-
-arr.push(
-(prices[i]-prices[i-1])/prices[i-1]
-);
-
-}
-
-return arr;
-
-}
-
 function mean(arr){
+
+if(!arr || arr.length === 0){
+return 0;
+}
+
 return arr.reduce((a,b)=>a+b,0)/arr.length;
+
 }
 
 function variance(arr){
+
+if(!arr || arr.length === 0){
+return 0;
+}
 
 const avg = mean(arr);
 
@@ -439,6 +434,10 @@ arr.map(v => Math.pow(v-avg,2))
 }
 
 function covariance(a,b){
+
+if(!a.length || !b.length){
+return 0;
+}
 
 const avgA = mean(a);
 const avgB = mean(b);
@@ -456,6 +455,22 @@ return sum/a.length;
 
 }
 
+function calcReturns(prices){
+
+let arr = [];
+
+for(let i=1;i<prices.length;i++){
+
+arr.push(
+(prices[i]-prices[i-1])/prices[i-1]
+);
+
+}
+
+return arr;
+
+}
+
 function calcBeta(asset,benchmark){
 
 const cov =
@@ -468,7 +483,13 @@ if(vari===0){
 return 0;
 }
 
-return cov/vari;
+const beta = cov/vari;
+
+if(isNaN(beta) || !isFinite(beta)){
+return 0;
+}
+
+return beta;
 
 }
 
@@ -668,6 +689,10 @@ benchmarkReturns.length,
 windowSize
 );
 
+if(minLen <= 1){
+continue;
+}
+
 const alignedReturns =
 returns.slice(-minLen);
 
@@ -711,13 +736,13 @@ if(portfolioBeta > 0.8){
 
 document.getElementById("risk-status")
 .innerHTML =
-'<span class="risk-on">Risk ON</span>';
+'<span class="risk-on">風險開啟</span>';
 
 }else{
 
 document.getElementById("risk-status")
 .innerHTML =
-'<span class="risk-off">Risk OFF</span>';
+'<span class="risk-off">風險防禦</span>';
 
 }
 
@@ -733,7 +758,9 @@ const rc =
 document.getElementById(
 "rc-"+asset.toLowerCase()
 ).innerText =
-rc.toFixed(1)+"%";
+isNaN(rc)
+? "0.0%"
+: rc.toFixed(1)+"%";
 
 }
 
