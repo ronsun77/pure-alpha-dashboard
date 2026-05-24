@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Pure Alpha 戰情室 V5</title>
+<title>Pure Alpha 戰情室 V6</title>
 
 <style>
 
@@ -23,7 +23,7 @@ padding:20px;
 }
 
 .container{
-max-width:1800px;
+max-width:1900px;
 margin:auto;
 }
 
@@ -132,6 +132,12 @@ border:2px solid #ef4444;
 color:#ef4444;
 }
 
+.neutral-box{
+background:rgba(250,204,21,0.15);
+border:2px solid #facc15;
+color:#facc15;
+}
+
 .footer{
 margin-top:40px;
 text-align:center;
@@ -153,10 +159,10 @@ color:#ef4444;
 
 <div class="container">
 
-<h1>Pure Alpha 戰情室 V5</h1>
+<h1>Pure Alpha 戰情室 V6</h1>
 
 <div class="subtitle">
-Regime + Dynamic Allocation + Portfolio Risk Engine
+Regime Engine × Dynamic Allocation × Correlation Matrix × Portfolio Risk Engine
 </div>
 
 <div class="grid">
@@ -270,6 +276,34 @@ Benchmark：
 
 </div>
 
+<!-- Correlation -->
+<div class="card">
+
+<h2>Rolling Correlation Matrix</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>資產</th>
+<th>Correlation</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr><td>QLD</td><td id="corr-qld">-</td></tr>
+<tr><td>TLT</td><td id="corr-tlt">-</td></tr>
+<tr><td>GLD</td><td id="corr-gld">-</td></tr>
+<tr><td>UUP</td><td id="corr-uup">-</td></tr>
+<tr><td>SGOV</td><td id="corr-sgov">-</td></tr>
+
+</tbody>
+
+</table>
+
+</div>
+
 <!-- Portfolio Risk -->
 <div class="card">
 
@@ -321,10 +355,51 @@ Benchmark：
 
 </div>
 
+<!-- Regime Score -->
+<div class="card">
+
+<h2>Regime Score Engine</h2>
+
+<div class="metric">
+<span class="label">QQQ > MA200</span>
+<span id="score-ma200" class="value">-</span>
+</div>
+
+<div class="metric">
+<span class="label">QQQ > MA50</span>
+<span id="score-ma50" class="value">-</span>
+</div>
+
+<div class="metric">
+<span class="label">SPY Drawdown</span>
+<span id="score-dd" class="value">-</span>
+</div>
+
+<div class="metric">
+<span class="label">TLT Trend</span>
+<span id="score-tlt" class="value">-</span>
+</div>
+
+<div class="metric">
+<span class="label">Dollar Trend</span>
+<span id="score-uup" class="value">-</span>
+</div>
+
+<div class="metric">
+<span class="label">總 Score</span>
+<span id="regime-score-total" class="value yellow">-</span>
+</div>
+
+<div id="regime-final-box" class="regime-box bull-box">
+Loading...
+</div>
+
+</div>
+
 </div>
 
 <div class="footer">
-Pure Alpha 多資產風險系統 V5
+Pure Alpha 多資產風險作戰系統 V6
 </div>
 
 </div>
@@ -382,12 +457,8 @@ const response = await fetch(url);
 
 const data = await response.json();
 
-console.log(symbol,data);
-
 if(!data.values){
-
 return [];
-
 }
 
 const prices =
@@ -452,6 +523,32 @@ return sum/a.length;
 
 }
 
+function correlation(a,b){
+
+const cov =
+covariance(a,b);
+
+const stdA =
+std(a);
+
+const stdB =
+std(b);
+
+if(stdA===0 || stdB===0){
+return 0;
+}
+
+const corr =
+cov / (stdA*stdB);
+
+if(!isFinite(corr)){
+return 0;
+}
+
+return corr;
+
+}
+
 function calcReturns(prices){
 
 let arr = [];
@@ -504,10 +601,6 @@ cachedPrices["QQQ"];
 
 const spyPrices =
 cachedPrices["SPY"];
-
-if(!qqqPrices || qqqPrices.length < 200){
-return;
-}
 
 const qqq =
 qqqPrices[qqqPrices.length-1];
@@ -610,6 +703,46 @@ beta.toFixed(2);
 
 }
 
+async function updateCorrelationMatrix(){
+
+const benchmarkPrices =
+cachedPrices[benchmark];
+
+const benchmarkReturns =
+calcReturns(benchmarkPrices);
+
+for(let i=1;i<assets.length;i++){
+
+const asset = assets[i];
+
+const prices =
+cachedPrices[asset];
+
+const returns =
+calcReturns(prices);
+
+const minLen =
+Math.min(
+returns.length,
+benchmarkReturns.length,
+windowSize
+);
+
+const corr =
+correlation(
+returns.slice(-minLen),
+benchmarkReturns.slice(-minLen)
+);
+
+document.getElementById(
+"corr-"+asset.toLowerCase()
+).innerText =
+corr.toFixed(2);
+
+}
+
+}
+
 async function updatePortfolioRisk(){
 
 const benchmarkPrices =
@@ -706,6 +839,189 @@ isFinite(rc)
 
 }
 
+async function updateRegimeScore(){
+
+const qqqPrices =
+cachedPrices["QQQ"];
+
+const spyPrices =
+cachedPrices["SPY"];
+
+const tltPrices =
+cachedPrices["TLT"];
+
+const uupPrices =
+cachedPrices["UUP"];
+
+const qqq =
+qqqPrices[qqqPrices.length-1];
+
+const ma50 =
+mean(qqqPrices.slice(-50));
+
+const ma200 =
+mean(qqqPrices.slice(-200));
+
+const spy =
+spyPrices[spyPrices.length-1];
+
+const spyHigh =
+Math.max(...spyPrices);
+
+const drawdown =
+((spy-spyHigh)/spyHigh)*100;
+
+const tlt =
+tltPrices[tltPrices.length-1];
+
+const tltMA50 =
+mean(tltPrices.slice(-50));
+
+const uup =
+uupPrices[uupPrices.length-1];
+
+const uupMA50 =
+mean(uupPrices.slice(-50));
+
+let score = 0;
+
+if(qqq > ma200){
+
+score += 1;
+
+document.getElementById("score-ma200")
+.innerHTML =
+'<span class="green">+1</span>';
+
+}else{
+
+score -= 1;
+
+document.getElementById("score-ma200")
+.innerHTML =
+'<span class="red">-1</span>';
+
+}
+
+if(qqq > ma50){
+
+score += 1;
+
+document.getElementById("score-ma50")
+.innerHTML =
+'<span class="green">+1</span>';
+
+}else{
+
+score -= 1;
+
+document.getElementById("score-ma50")
+.innerHTML =
+'<span class="red">-1</span>';
+
+}
+
+if(drawdown > -10){
+
+score += 1;
+
+document.getElementById("score-dd")
+.innerHTML =
+'<span class="green">+1</span>';
+
+}else{
+
+score -= 1;
+
+document.getElementById("score-dd")
+.innerHTML =
+'<span class="red">-1</span>';
+
+}
+
+if(tlt > tltMA50){
+
+score -= 1;
+
+document.getElementById("score-tlt")
+.innerHTML =
+'<span class="yellow">Risk Off</span>';
+
+}else{
+
+score += 1;
+
+document.getElementById("score-tlt")
+.innerHTML =
+'<span class="green">Risk On</span>';
+
+}
+
+if(uup > uupMA50){
+
+score -= 1;
+
+document.getElementById("score-uup")
+.innerHTML =
+'<span class="yellow">Dollar Strong</span>';
+
+}else{
+
+score += 1;
+
+document.getElementById("score-uup")
+.innerHTML =
+'<span class="green">Liquidity OK</span>';
+
+}
+
+document.getElementById("regime-score-total")
+.innerText = score;
+
+if(score >= 3){
+
+document.getElementById("regime-final-box")
+.className =
+"regime-box bull-box";
+
+document.getElementById("regime-final-box")
+.innerText =
+"Strong Bull Regime";
+
+}else if(score >= 1){
+
+document.getElementById("regime-final-box")
+.className =
+"regime-box bull-box";
+
+document.getElementById("regime-final-box")
+.innerText =
+"Bull Regime";
+
+}else if(score >= -1){
+
+document.getElementById("regime-final-box")
+.className =
+"regime-box neutral-box";
+
+document.getElementById("regime-final-box")
+.innerText =
+"Neutral Regime";
+
+}else{
+
+document.getElementById("regime-final-box")
+.className =
+"regime-box bear-box";
+
+document.getElementById("regime-final-box")
+.innerText =
+"Bear / Crisis Regime";
+
+}
+
+}
+
 document
 .getElementById("benchmark-select")
 .addEventListener("change",(e)=>{
@@ -745,9 +1061,13 @@ await updateRegime();
 
 await updateRollingBeta();
 
+await updateCorrelationMatrix();
+
 await updatePortfolioRisk();
 
-console.log("System Ready");
+await updateRegimeScore();
+
+console.log("V6 System Ready");
 
 }
 
