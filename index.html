@@ -28,7 +28,7 @@ margin:auto;
 }
 
 h1{
-font-size:48px;
+font-size:42px;
 margin-bottom:10px;
 color:white;
 }
@@ -156,7 +156,7 @@ color:#ef4444;
 <h1>Pure Alpha 戰情室 V5</h1>
 
 <div class="subtitle">
-多資產風險系統 × Dynamic Allocation × Rolling Beta × Tactical Overlay
+Regime + Dynamic Allocation + Portfolio Risk Engine
 </div>
 
 <div class="grid">
@@ -177,7 +177,7 @@ color:#ef4444;
 </div>
 
 <div class="metric">
-<span class="label">SPY 回撤幅度</span>
+<span class="label">SPY 回撤</span>
 <span id="spy-dd" class="value yellow">Loading...</span>
 </div>
 
@@ -192,10 +192,10 @@ Loading...
 
 </div>
 
-<!-- Allocation -->
+<!-- 配置 -->
 <div class="card">
 
-<h2>Dynamic Allocation Engine</h2>
+<h2>Dynamic Allocation</h2>
 
 <table>
 
@@ -324,7 +324,7 @@ Benchmark：
 </div>
 
 <div class="footer">
-Pure Alpha 多資產風險作戰系統 V5
+Pure Alpha 多資產風險系統 V5
 </div>
 
 </div>
@@ -333,19 +333,21 @@ Pure Alpha 多資產風險作戰系統 V5
 
 const API_KEY = "b286e5ff15bc4cf8a2eb07d873e3ed3a";
 
-const assets = ["QQQ","QLD","TLT","GLD","UUP","SGOV"];
+const assets = [
+"QQQ",
+"QLD",
+"TLT",
+"GLD",
+"UUP",
+"SGOV"
+];
+
+let cachedPrices = {};
 
 let benchmark = "QQQ";
 let windowSize = 21;
 
-let currentAllocation = {
-QQQ:0,
-QLD:0,
-TLT:0,
-GLD:0,
-UUP:0,
-SGOV:0
-};
+let currentAllocation = {};
 
 const bullBase = {
 QQQ:26,
@@ -367,6 +369,10 @@ SGOV:20
 
 async function fetchPrices(symbol){
 
+if(cachedPrices[symbol]){
+return cachedPrices[symbol];
+}
+
 try{
 
 const url =
@@ -376,21 +382,26 @@ const response = await fetch(url);
 
 const data = await response.json();
 
-if(!data.values){
-
 console.log(symbol,data);
+
+if(!data.values){
 
 return [];
 
 }
 
-return data.values
+const prices =
+data.values
 .map(v => parseFloat(v.close))
 .reverse();
 
+cachedPrices[symbol] = prices;
+
+return prices;
+
 }catch(error){
 
-console.log(error);
+console.log(symbol,error);
 
 return [];
 
@@ -489,12 +500,12 @@ return beta;
 async function updateRegime(){
 
 const qqqPrices =
-await fetchPrices("QQQ");
+cachedPrices["QQQ"];
 
 const spyPrices =
-await fetchPrices("SPY");
+cachedPrices["SPY"];
 
-if(qqqPrices.length < 200){
+if(!qqqPrices || qqqPrices.length < 200){
 return;
 }
 
@@ -562,7 +573,7 @@ document.getElementById("w-sgov").innerText = currentAllocation.SGOV+"%";
 async function updateRollingBeta(){
 
 const benchmarkPrices =
-await fetchPrices(benchmark);
+cachedPrices[benchmark];
 
 const benchmarkReturns =
 calcReturns(benchmarkPrices);
@@ -572,7 +583,7 @@ for(let i=1;i<assets.length;i++){
 const asset = assets[i];
 
 const prices =
-await fetchPrices(asset);
+cachedPrices[asset];
 
 const returns =
 calcReturns(prices);
@@ -583,10 +594,6 @@ returns.length,
 benchmarkReturns.length,
 windowSize
 );
-
-if(minLen < 10){
-continue;
-}
 
 const beta =
 calcBeta(
@@ -606,7 +613,7 @@ beta.toFixed(2);
 async function updatePortfolioRisk(){
 
 const benchmarkPrices =
-await fetchPrices(benchmark);
+cachedPrices[benchmark];
 
 const benchmarkReturns =
 calcReturns(benchmarkPrices);
@@ -619,7 +626,7 @@ const volData = {};
 for(let asset of assets){
 
 const prices =
-await fetchPrices(asset);
+cachedPrices[asset];
 
 const returns =
 calcReturns(prices);
@@ -630,14 +637,6 @@ returns.length,
 benchmarkReturns.length,
 windowSize
 );
-
-if(minLen < 10){
-
-volData[asset] = 0;
-
-continue;
-
-}
 
 const assetReturns =
 returns.slice(-minLen);
@@ -730,17 +729,21 @@ init();
 
 async function init(){
 
+cachedPrices = {};
+
+await Promise.all([
+fetchPrices("QQQ"),
+fetchPrices("QLD"),
+fetchPrices("TLT"),
+fetchPrices("GLD"),
+fetchPrices("UUP"),
+fetchPrices("SGOV"),
+fetchPrices("SPY")
+]);
+
 await updateRegime();
 
-await new Promise(resolve =>
-setTimeout(resolve,500)
-);
-
 await updateRollingBeta();
-
-await new Promise(resolve =>
-setTimeout(resolve,300)
-);
 
 await updatePortfolioRisk();
 
