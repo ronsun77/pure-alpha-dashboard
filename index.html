@@ -156,12 +156,12 @@ color:#ef4444;
 <h1>Pure Alpha 戰情室 V5</h1>
 
 <div class="subtitle">
-Portfolio Risk Engine × Dynamic Allocation × Rolling Beta × Tactical Overlay
+多資產風險系統 × Dynamic Allocation × Rolling Beta × Tactical Overlay
 </div>
 
 <div class="grid">
 
-<!-- 市場 Regime -->
+<!-- 市場 -->
 <div class="card">
 
 <h2>市場 Regime Engine</h2>
@@ -192,7 +192,7 @@ Loading...
 
 </div>
 
-<!-- Allocation -->
+<!-- 配置 -->
 <div class="card">
 
 <h2>Dynamic Allocation Engine</h2>
@@ -202,7 +202,7 @@ Loading...
 <thead>
 <tr>
 <th>資產</th>
-<th>目前權重</th>
+<th>權重</th>
 </tr>
 </thead>
 
@@ -247,7 +247,7 @@ Benchmark：
 
 </div>
 
-<table id="beta-table">
+<table>
 
 <thead>
 <tr>
@@ -288,11 +288,6 @@ Benchmark：
 <div class="metric">
 <span class="label">風險狀態</span>
 <span id="risk-status" class="value">Loading...</span>
-</div>
-
-<div class="metric">
-<span class="label">最大回撤控制</span>
-<span class="value red">-35%</span>
 </div>
 
 </div>
@@ -392,6 +387,8 @@ SGOV:20
 
 async function fetchPrices(symbol){
 
+try{
+
 const url =
 `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=250&apikey=${API_KEY}`;
 
@@ -411,31 +408,47 @@ return data.values
 .map(v => parseFloat(v.close))
 .reverse();
 
+}catch(error){
+
+console.log(symbol,error);
+
+return [];
+
+}
+
 }
 
 function mean(arr){
 
-if(arr.length===0) return 0;
+if(!arr || arr.length===0){
+return 0;
+}
 
 return arr.reduce((a,b)=>a+b,0)/arr.length;
 
 }
 
-function variance(arr){
+function std(arr){
 
-if(arr.length===0) return 0;
+if(!arr || arr.length<2){
+return 0;
+}
 
 const avg = mean(arr);
 
-return mean(
-arr.map(v => Math.pow(v-avg,2))
-);
+const squareDiffs =
+arr.map(v => Math.pow(v-avg,2));
+
+const avgSquareDiff =
+mean(squareDiffs);
+
+return Math.sqrt(avgSquareDiff);
 
 }
 
 function covariance(a,b){
 
-if(a.length===0 || b.length===0){
+if(!a || !b || a.length===0 || b.length===0){
 return 0;
 }
 
@@ -461,9 +474,12 @@ let arr = [];
 
 for(let i=1;i<prices.length;i++){
 
-arr.push(
-(prices[i]-prices[i-1])/prices[i-1]
-);
+const r =
+(prices[i]-prices[i-1])/prices[i-1];
+
+if(isFinite(r)){
+arr.push(r);
+}
 
 }
 
@@ -471,19 +487,25 @@ return arr;
 
 }
 
-function calcBeta(asset,benchmark){
+function calcBeta(assetReturns,benchmarkReturns){
 
 const cov =
-covariance(asset,benchmark);
+covariance(assetReturns,benchmarkReturns);
 
-const vari =
-variance(benchmark);
+const benchmarkStd =
+std(benchmarkReturns);
 
-if(vari===0) return 0;
+const benchmarkVar =
+benchmarkStd * benchmarkStd;
 
-const beta = cov/vari;
+if(benchmarkVar===0){
+return 0;
+}
 
-if(isNaN(beta) || !isFinite(beta)){
+const beta =
+cov/benchmarkVar;
+
+if(!isFinite(beta)){
 return 0;
 }
 
@@ -516,15 +538,24 @@ benchmarkReturns.length,
 windowSize
 );
 
-if(minLen < 5){
+if(minLen < 10){
+
+document.getElementById(
+"beta-"+asset.toLowerCase()
+).innerText = "N/A";
+
 continue;
+
 }
 
+const assetSlice =
+returns.slice(-minLen);
+
+const benchmarkSlice =
+benchmarkReturns.slice(-minLen);
+
 const beta =
-calcBeta(
-returns.slice(-minLen),
-benchmarkReturns.slice(-minLen)
-);
+calcBeta(assetSlice,benchmarkSlice);
 
 document.getElementById(
 "beta-"+asset.toLowerCase()
@@ -547,9 +578,7 @@ const qqq =
 qqqPrices[qqqPrices.length-1];
 
 const ma200 =
-mean(
-qqqPrices.slice(-200)
-);
+mean(qqqPrices.slice(-200));
 
 const spy =
 spyPrices[spyPrices.length-1];
@@ -561,16 +590,13 @@ const drawdown =
 ((spy-spyHigh)/spyHigh)*100;
 
 document.getElementById("qqq-price")
-.innerText =
-qqq.toFixed(2);
+.innerText = qqq.toFixed(2);
 
 document.getElementById("qqq-ma200")
-.innerText =
-ma200.toFixed(2);
+.innerText = ma200.toFixed(2);
 
 document.getElementById("spy-dd")
-.innerText =
-drawdown.toFixed(1)+"%";
+.innerText = drawdown.toFixed(1)+"%";
 
 let alloc = {};
 
@@ -582,12 +608,10 @@ document.getElementById("market-status")
 .innerText = "Bull Market";
 
 document.getElementById("regime-box")
-.className =
-"regime-box bull-box";
+.className = "regime-box bull-box";
 
 document.getElementById("regime-box")
-.innerText =
-"Bull Market";
+.innerText = "Bull Market";
 
 }else{
 
@@ -597,12 +621,10 @@ document.getElementById("market-status")
 .innerText = "Bear Market";
 
 document.getElementById("regime-box")
-.className =
-"regime-box bear-box";
+.className = "regime-box bear-box";
 
 document.getElementById("regime-box")
-.innerText =
-"Bear Market";
+.innerText = "Bear Market";
 
 }
 
@@ -617,8 +639,7 @@ alloc.SGOV += alloc.QLD;
 alloc.QLD = 0;
 
 document.getElementById("overlay-1")
-.innerText =
-"Triggered";
+.innerText = "Triggered";
 
 }
 
@@ -628,8 +649,7 @@ alloc.QLD += 5;
 alloc.SGOV -= 5;
 
 document.getElementById("overlay-2")
-.innerText =
-"Triggered";
+.innerText = "Triggered";
 
 }
 
@@ -639,8 +659,7 @@ alloc.QLD += 10;
 alloc.SGOV -= 10;
 
 document.getElementById("overlay-3")
-.innerText =
-"Triggered";
+.innerText = "Triggered";
 
 }
 
@@ -650,8 +669,7 @@ alloc.QLD += 15;
 alloc.SGOV -= 15;
 
 document.getElementById("overlay-4")
-.innerText =
-"Triggered";
+.innerText = "Triggered";
 
 }
 
@@ -684,10 +702,6 @@ for(let asset of assets){
 const prices =
 await fetchPrices(asset);
 
-if(prices.length < windowSize+5){
-continue;
-}
-
 const returns =
 calcReturns(prices);
 
@@ -698,38 +712,48 @@ benchmarkReturns.length,
 windowSize
 );
 
-if(minLen < 5){
+if(minLen < 10){
+
+volData[asset] = 0;
 continue;
+
 }
 
-const alignedReturns =
+const assetSlice =
 returns.slice(-minLen);
 
-const alignedBenchmark =
+const benchmarkSlice =
 benchmarkReturns.slice(-minLen);
 
 const beta =
-calcBeta(
-alignedReturns,
-alignedBenchmark
-);
+calcBeta(assetSlice,benchmarkSlice);
 
 const vol =
-Math.sqrt(
-variance(alignedReturns)
-)*Math.sqrt(252);
+std(assetSlice)*Math.sqrt(252);
 
 const weight =
 (currentAllocation[asset]||0)/100;
 
+if(isFinite(beta)){
+
 portfolioBeta +=
 beta * weight;
+
+}
+
+if(isFinite(vol)){
 
 portfolioVol +=
 vol * weight;
 
 volData[asset] =
 vol * weight;
+
+}else{
+
+volData[asset] = 0;
+
+}
 
 }
 
@@ -767,9 +791,9 @@ const rc =
 document.getElementById(
 "rc-"+asset.toLowerCase()
 ).innerText =
-isNaN(rc)
-? "0.0%"
-: rc.toFixed(1)+"%";
+isFinite(rc)
+? rc.toFixed(1)+"%"
+: "0.0%";
 
 }
 
