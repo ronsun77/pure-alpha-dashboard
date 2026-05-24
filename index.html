@@ -10,140 +10,140 @@
 <style>
 
 *{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial,sans-serif;
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
 }
 
 body{
-  background:#081028;
-  color:#e2e8f0;
-  padding:20px;
+background:#081028;
+color:#e2e8f0;
+padding:20px;
 }
 
 .container{
-  max-width:1800px;
-  margin:auto;
+max-width:1800px;
+margin:auto;
 }
 
 h1{
-  font-size:48px;
-  margin-bottom:10px;
-  color:white;
+font-size:48px;
+margin-bottom:10px;
+color:white;
 }
 
 .subtitle{
-  color:#94a3b8;
-  margin-bottom:30px;
+color:#94a3b8;
+margin-bottom:30px;
 }
 
 .grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
-  gap:20px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
+gap:20px;
 }
 
 .card{
-  background:#17233a;
-  border-radius:20px;
-  padding:24px;
-  box-shadow:0 4px 25px rgba(0,0,0,0.35);
+background:#17233a;
+border-radius:20px;
+padding:24px;
+box-shadow:0 4px 25px rgba(0,0,0,0.35);
 }
 
 .card h2{
-  color:#38bdf8;
-  margin-bottom:20px;
+color:#38bdf8;
+margin-bottom:20px;
 }
 
 .metric{
-  display:flex;
-  justify-content:space-between;
-  padding:12px 0;
-  border-bottom:1px solid #334155;
+display:flex;
+justify-content:space-between;
+padding:12px 0;
+border-bottom:1px solid #334155;
 }
 
 .metric:last-child{
-  border-bottom:none;
+border-bottom:none;
 }
 
 .label{
-  color:#cbd5e1;
+color:#cbd5e1;
 }
 
 .value{
-  color:white;
-  font-weight:bold;
+color:white;
+font-weight:bold;
 }
 
 .green{
-  color:#22c55e;
+color:#22c55e;
 }
 
 .red{
-  color:#ef4444;
+color:#ef4444;
 }
 
 .yellow{
-  color:#facc15;
+color:#facc15;
 }
 
 table{
-  width:100%;
-  border-collapse:collapse;
+width:100%;
+border-collapse:collapse;
 }
 
 th,td{
-  padding:14px;
-  text-align:center;
-  border-bottom:1px solid #334155;
+padding:14px;
+text-align:center;
+border-bottom:1px solid #334155;
 }
 
 th{
-  background:#334155;
+background:#334155;
 }
 
 select{
-  background:#081028;
-  color:white;
-  border:1px solid #334155;
-  padding:8px 12px;
-  border-radius:8px;
+background:#081028;
+color:white;
+border:1px solid #334155;
+padding:8px 12px;
+border-radius:8px;
 }
 
 .regime-box{
-  margin-top:20px;
-  padding:20px;
-  border-radius:16px;
-  text-align:center;
-  font-size:24px;
-  font-weight:bold;
+margin-top:20px;
+padding:20px;
+border-radius:16px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
 }
 
 .bull-box{
-  background:rgba(34,197,94,0.15);
-  border:2px solid #22c55e;
-  color:#22c55e;
+background:rgba(34,197,94,0.15);
+border:2px solid #22c55e;
+color:#22c55e;
 }
 
 .bear-box{
-  background:rgba(239,68,68,0.15);
-  border:2px solid #ef4444;
-  color:#ef4444;
+background:rgba(239,68,68,0.15);
+border:2px solid #ef4444;
+color:#ef4444;
 }
 
 .footer{
-  margin-top:40px;
-  text-align:center;
-  color:#94a3b8;
+margin-top:40px;
+text-align:center;
+color:#94a3b8;
 }
 
 .risk-on{
-  color:#22c55e;
+color:#22c55e;
 }
 
 .risk-off{
-  color:#ef4444;
+color:#ef4444;
 }
 
 </style>
@@ -156,7 +156,7 @@ select{
 <h1>Pure Alpha 戰情室 V5</h1>
 
 <div class="subtitle">
-多資產風險系統 × Dynamic Allocation × Rolling Beta × Tactical Overlay
+Portfolio Risk Engine × Dynamic Allocation × Rolling Beta × Tactical Overlay
 </div>
 
 <div class="grid">
@@ -192,7 +192,7 @@ Loading...
 
 </div>
 
-<!-- 動態配置 -->
+<!-- Allocation -->
 <div class="card">
 
 <h2>Dynamic Allocation Engine</h2>
@@ -258,11 +258,11 @@ Benchmark：
 
 <tbody>
 
-<tr><td>QLD</td><td>Loading...</td></tr>
-<tr><td>TLT</td><td>Loading...</td></tr>
-<tr><td>GLD</td><td>Loading...</td></tr>
-<tr><td>UUP</td><td>Loading...</td></tr>
-<tr><td>SGOV</td><td>Loading...</td></tr>
+<tr><td>QLD</td><td id="beta-qld">-</td></tr>
+<tr><td>TLT</td><td id="beta-tlt">-</td></tr>
+<tr><td>GLD</td><td id="beta-gld">-</td></tr>
+<tr><td>UUP</td><td id="beta-uup">-</td></tr>
+<tr><td>SGOV</td><td id="beta-sgov">-</td></tr>
 
 </tbody>
 
@@ -292,7 +292,7 @@ Benchmark：
 
 <div class="metric">
 <span class="label">最大回撤控制</span>
-<span id="max-dd" class="value red">-35%</span>
+<span class="value red">-35%</span>
 </div>
 
 </div>
@@ -326,7 +326,7 @@ Benchmark：
 
 </div>
 
-<!-- Tactical Overlay -->
+<!-- Overlay -->
 <div class="card">
 
 <h2>戰術 Overlay</h2>
@@ -393,14 +393,18 @@ SGOV:20
 async function fetchPrices(symbol){
 
 const url =
-`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=220&apikey=${API_KEY}`;
+`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=250&apikey=${API_KEY}`;
 
 const response = await fetch(url);
 
 const data = await response.json();
 
 if(!data.values){
+
+console.log(symbol,data);
+
 return [];
+
 }
 
 return data.values
@@ -411,9 +415,7 @@ return data.values
 
 function mean(arr){
 
-if(!arr || arr.length === 0){
-return 0;
-}
+if(arr.length===0) return 0;
 
 return arr.reduce((a,b)=>a+b,0)/arr.length;
 
@@ -421,9 +423,7 @@ return arr.reduce((a,b)=>a+b,0)/arr.length;
 
 function variance(arr){
 
-if(!arr || arr.length === 0){
-return 0;
-}
+if(arr.length===0) return 0;
 
 const avg = mean(arr);
 
@@ -435,7 +435,7 @@ arr.map(v => Math.pow(v-avg,2))
 
 function covariance(a,b){
 
-if(!a.length || !b.length){
+if(a.length===0 || b.length===0){
 return 0;
 }
 
@@ -479,9 +479,7 @@ covariance(asset,benchmark);
 const vari =
 variance(benchmark);
 
-if(vari===0){
-return 0;
-}
+if(vari===0) return 0;
 
 const beta = cov/vari;
 
@@ -501,12 +499,9 @@ await fetchPrices(benchmark);
 const benchmarkReturns =
 calcReturns(benchmarkPrices);
 
-const rows =
-document.querySelectorAll("#beta-table tbody tr");
+for(let i=1;i<assets.length;i++){
 
-for(let i=0;i<5;i++){
-
-const asset = assets[i+1];
+const asset = assets[i];
 
 const prices =
 await fetchPrices(asset);
@@ -521,13 +516,19 @@ benchmarkReturns.length,
 windowSize
 );
 
+if(minLen < 5){
+continue;
+}
+
 const beta =
 calcBeta(
 returns.slice(-minLen),
 benchmarkReturns.slice(-minLen)
 );
 
-rows[i].children[1].innerText =
+document.getElementById(
+"beta-"+asset.toLowerCase()
+).innerText =
 beta.toFixed(2);
 
 }
@@ -546,9 +547,9 @@ const qqq =
 qqqPrices[qqqPrices.length-1];
 
 const ma200 =
-qqqPrices
-.slice(-200)
-.reduce((a,b)=>a+b,0)/200;
+mean(
+qqqPrices.slice(-200)
+);
 
 const spy =
 spyPrices[spyPrices.length-1];
@@ -560,13 +561,16 @@ const drawdown =
 ((spy-spyHigh)/spyHigh)*100;
 
 document.getElementById("qqq-price")
-.innerText = qqq.toFixed(2);
+.innerText =
+qqq.toFixed(2);
 
 document.getElementById("qqq-ma200")
-.innerText = ma200.toFixed(2);
+.innerText =
+ma200.toFixed(2);
 
 document.getElementById("spy-dd")
-.innerText = drawdown.toFixed(1)+"%";
+.innerText =
+drawdown.toFixed(1)+"%";
 
 let alloc = {};
 
@@ -578,10 +582,12 @@ document.getElementById("market-status")
 .innerText = "Bull Market";
 
 document.getElementById("regime-box")
-.className = "regime-box bull-box";
+.className =
+"regime-box bull-box";
 
 document.getElementById("regime-box")
-.innerText = "Bull Market";
+.innerText =
+"Bull Market";
 
 }else{
 
@@ -591,24 +597,19 @@ document.getElementById("market-status")
 .innerText = "Bear Market";
 
 document.getElementById("regime-box")
-.className = "regime-box bear-box";
+.className =
+"regime-box bear-box";
 
 document.getElementById("regime-box")
-.innerText = "Bear Market";
+.innerText =
+"Bear Market";
 
 }
 
-document.getElementById("overlay-1")
-.innerText = "Inactive";
-
-document.getElementById("overlay-2")
-.innerText = "Inactive";
-
-document.getElementById("overlay-3")
-.innerText = "Inactive";
-
-document.getElementById("overlay-4")
-.innerText = "Inactive";
+document.getElementById("overlay-1").innerText = "Inactive";
+document.getElementById("overlay-2").innerText = "Inactive";
+document.getElementById("overlay-3").innerText = "Inactive";
+document.getElementById("overlay-4").innerText = "Inactive";
 
 if(qqq < ma200*0.97){
 
@@ -616,7 +617,8 @@ alloc.SGOV += alloc.QLD;
 alloc.QLD = 0;
 
 document.getElementById("overlay-1")
-.innerText = "Triggered";
+.innerText =
+"Triggered";
 
 }
 
@@ -626,7 +628,8 @@ alloc.QLD += 5;
 alloc.SGOV -= 5;
 
 document.getElementById("overlay-2")
-.innerText = "Triggered";
+.innerText =
+"Triggered";
 
 }
 
@@ -636,7 +639,8 @@ alloc.QLD += 10;
 alloc.SGOV -= 10;
 
 document.getElementById("overlay-3")
-.innerText = "Triggered";
+.innerText =
+"Triggered";
 
 }
 
@@ -646,7 +650,8 @@ alloc.QLD += 15;
 alloc.SGOV -= 15;
 
 document.getElementById("overlay-4")
-.innerText = "Triggered";
+.innerText =
+"Triggered";
 
 }
 
@@ -679,6 +684,10 @@ for(let asset of assets){
 const prices =
 await fetchPrices(asset);
 
+if(prices.length < windowSize+5){
+continue;
+}
+
 const returns =
 calcReturns(prices);
 
@@ -689,7 +698,7 @@ benchmarkReturns.length,
 windowSize
 );
 
-if(minLen <= 1){
+if(minLen < 5){
 continue;
 }
 
@@ -753,7 +762,7 @@ Object.values(volData)
 for(let asset of assets){
 
 const rc =
-(volData[asset]/totalRisk)*100;
+((volData[asset]||0)/totalRisk)*100;
 
 document.getElementById(
 "rc-"+asset.toLowerCase()
@@ -772,8 +781,7 @@ document
 
 benchmark = e.target.value;
 
-updateRollingBeta();
-updatePortfolioRisk();
+init();
 
 });
 
@@ -784,8 +792,7 @@ document
 windowSize =
 parseInt(e.target.value);
 
-updateRollingBeta();
-updatePortfolioRisk();
+init();
 
 });
 
