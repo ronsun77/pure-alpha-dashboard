@@ -2,529 +2,373 @@
 <html lang="zh-Hant">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <title>Pure Alpha 多資產戰情室 V3</title>
+<title>Pure Alpha 多資產戰情室 V3</title>
 
-  <style>
+<style>
 
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Arial, sans-serif;
-    }
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial,sans-serif;
+}
 
-    body{
-      background:#0f172a;
-      color:#e2e8f0;
-      padding:20px;
-    }
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  padding:20px;
+}
 
-    .container{
-      max-width:1600px;
-      margin:auto;
-    }
+.container{
+  max-width:1600px;
+  margin:auto;
+}
 
-    h1{
-      font-size:36px;
-      color:white;
-      margin-bottom:10px;
-    }
+h1{
+  font-size:36px;
+  margin-bottom:10px;
+  color:white;
+}
 
-    .subtitle{
-      color:#94a3b8;
-      margin-bottom:30px;
-    }
+.subtitle{
+  color:#94a3b8;
+  margin-bottom:30px;
+}
 
-    .top-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:20px;
-      margin-bottom:20px;
-    }
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(450px,1fr));
+  gap:20px;
+}
 
-    .main-grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:20px;
-    }
+.card{
+  background:#1e293b;
+  border-radius:18px;
+  padding:24px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.3);
+}
 
-    .card{
-      background:#1e293b;
-      border-radius:18px;
-      padding:24px;
-      box-shadow:0 4px 20px rgba(0,0,0,0.3);
-    }
+.card h2{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
 
-    .card h2{
-      color:#38bdf8;
-      margin-bottom:20px;
-      font-size:24px;
-    }
+.metric{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 0;
+  border-bottom:1px solid #334155;
+}
 
-    .metric{
-      display:flex;
-      justify-content:space-between;
-      padding:12px 0;
-      border-bottom:1px solid #334155;
-    }
+.metric:last-child{
+  border-bottom:none;
+}
 
-    .metric:last-child{
-      border-bottom:none;
-    }
+.label{
+  color:#cbd5e1;
+}
 
-    .label{
-      color:#cbd5e1;
-    }
+.value{
+  font-weight:bold;
+  color:white;
+}
 
-    .value{
-      font-weight:bold;
-      color:white;
-    }
+.green{
+  color:#22c55e;
+}
 
-    .green{
-      color:#22c55e;
-    }
+.red{
+  color:#ef4444;
+}
 
-    .red{
-      color:#ef4444;
-    }
+.yellow{
+  color:#facc15;
+}
 
-    .yellow{
-      color:#facc15;
-    }
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
 
-    table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:10px;
-    }
+th,td{
+  padding:14px;
+  text-align:center;
+  border-bottom:1px solid #334155;
+}
 
-    th, td{
-      padding:14px;
-      text-align:center;
-      border-bottom:1px solid #334155;
-    }
+th{
+  background:#334155;
+  color:white;
+}
 
-    th{
-      background:#334155;
-      color:white;
-    }
+select{
+  background:#0f172a;
+  color:white;
+  border:1px solid #334155;
+  padding:8px 12px;
+  border-radius:8px;
+}
 
-    .signal-box{
-      background:#0f172a;
-      border:2px solid #38bdf8;
-      border-radius:14px;
-      padding:20px;
-      margin-top:10px;
-    }
+.footer{
+  margin-top:30px;
+  text-align:center;
+  color:#94a3b8;
+}
 
-    .signal-title{
-      color:#38bdf8;
-      font-size:20px;
-      margin-bottom:15px;
-      font-weight:bold;
-    }
-
-    .signal-item{
-      margin-bottom:10px;
-      font-size:16px;
-    }
-
-    .footer{
-      margin-top:30px;
-      text-align:center;
-      color:#94a3b8;
-      font-size:14px;
-    }
-
-    select{
-      background:#0f172a;
-      color:white;
-      border:1px solid #334155;
-      padding:8px 12px;
-      border-radius:8px;
-    }
-
-    .loading{
-      color:#38bdf8;
-    }
-
-    @media (max-width:900px){
-
-      .top-grid{
-        grid-template-columns:1fr;
-      }
-
-    }
-
-  </style>
-
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-  <h1>Pure Alpha 多資產戰情室 V3</h1>
+<h1>Pure Alpha 多資產戰情室 V3</h1>
 
-  <div class="subtitle">
-    Regime 市場判定 × 多資產動態配置 × 戰術風控系統
-  </div>
+<div class="subtitle">
+Regime 市場判定 × 多資產動態配置 × Rolling Beta 監控
+</div>
 
-  <!-- TOP GRID -->
-  <div class="top-grid">
+<div class="grid">
 
-    <!-- 市場 Regime -->
-    <div class="card">
+<!-- Regime -->
+<div class="card">
 
-      <h2>市場 Regime 引擎</h2>
+<h2>市場 Regime</h2>
 
-      <div class="metric">
-        <span class="label">QQQ 趨勢</span>
-        <span class="value green">Bullish</span>
-      </div>
+<div class="metric">
+  <span class="label">QQQ MA200 狀態</span>
+  <span id="qqq-status" class="value yellow">Loading...</span>
+</div>
 
-      <div class="metric">
-        <span class="label">TLT 趨勢</span>
-        <span class="value yellow">Neutral</span>
-      </div>
+<div class="metric">
+  <span class="label">QQQ 現價</span>
+  <span id="qqq-price" class="value">Loading...</span>
+</div>
 
-      <div class="metric">
-        <span class="label">GLD 趨勢</span>
-        <span class="value yellow">Neutral</span>
-      </div>
+<div class="metric">
+  <span class="label">QQQ MA200</span>
+  <span id="qqq-ma200" class="value">Loading...</span>
+</div>
 
-      <div class="metric">
-        <span class="label">UUP 趨勢</span>
-        <span class="value green">Strong</span>
-      </div>
+<div class="metric">
+  <span class="label">目前市場</span>
+  <span id="market-regime" class="value">Loading...</span>
+</div>
 
-      <div class="metric">
-        <span class="label">目前市場 Regime</span>
-        <span class="value green">防禦型成長</span>
-      </div>
+</div>
 
-    </div>
+<!-- Allocation -->
+<div class="card">
 
-    <!-- Weekly Signal -->
-    <div class="card">
+<h2>Base Allocation</h2>
 
-      <h2>本週戰術訊號</h2>
+<table>
 
-      <div class="signal-box">
+<thead>
+<tr>
+<th>資產</th>
+<th>牛市</th>
+<th>熊市</th>
+</tr>
+</thead>
 
-        <div class="signal-title">
-          防禦型成長模式
-        </div>
+<tbody>
 
-        <div class="signal-item green">
-          ✓ 維持 QQQ 核心部位
-        </div>
+<tr>
+<td>QQQ</td>
+<td>26%</td>
+<td>20%</td>
+</tr>
 
-        <div class="signal-item yellow">
-          ✓ 降低 QLD 槓桿曝險
-        </div>
+<tr>
+<td>QLD</td>
+<td>32%</td>
+<td>20%</td>
+</tr>
 
-        <div class="signal-item green">
-          ✓ 維持 UUP 流動性避險
-        </div>
+<tr>
+<td>TLT</td>
+<td>7%</td>
+<td>10%</td>
+</tr>
 
-        <div class="signal-item yellow">
-          ✓ 保留 SGOV 現金緩衝
-        </div>
+<tr>
+<td>GLD</td>
+<td>7%</td>
+<td>10%</td>
+</tr>
 
-      </div>
+<tr>
+<td>UUP</td>
+<td>9%</td>
+<td>20%</td>
+</tr>
 
-    </div>
+<tr>
+<td>SGOV</td>
+<td>19%</td>
+<td>20%</td>
+</tr>
 
-  </div>
+</tbody>
 
-  <!-- MAIN GRID -->
-  <div class="main-grid">
+</table>
 
-    <!-- Base Allocation -->
-    <div class="card">
+</div>
 
-      <h2>核心 Base 資產配置</h2>
+<!-- Rolling Beta -->
+<div class="card">
 
-      <table>
+<h2>Rolling Beta 監控</h2>
 
-        <thead>
+<div style="margin-bottom:20px;">
 
-          <tr>
-            <th>資產</th>
-            <th>牛市 Base</th>
-            <th>熊市 Base</th>
-            <th>目前配置</th>
-          </tr>
+Benchmark：
 
-        </thead>
+<select id="benchmark-select">
+<option value="QQQ">QQQ</option>
+<option value="SPY">SPY</option>
+</select>
 
-        <tbody>
+&nbsp;&nbsp;&nbsp;
 
-          <tr>
-            <td>QQQ</td>
-            <td>26%</td>
-            <td>20%</td>
-            <td>26%</td>
-          </tr>
+週期：
 
-          <tr>
-            <td>QLD</td>
-            <td>32%</td>
-            <td>20%</td>
-            <td>32%</td>
-          </tr>
+<select id="window-select">
+<option value="21">21D</option>
+<option value="63">63D</option>
+<option value="126">126D</option>
+</select>
 
-          <tr>
-            <td>TLT</td>
-            <td>7%</td>
-            <td>10%</td>
-            <td>7%</td>
-          </tr>
+</div>
 
-          <tr>
-            <td>GLD</td>
-            <td>7%</td>
-            <td>10%</td>
-            <td>7%</td>
-          </tr>
+<table id="beta-table">
 
-          <tr>
-            <td>UUP</td>
-            <td>9%</td>
-            <td>20%</td>
-            <td>9%</td>
-          </tr>
+<thead>
+<tr>
+<th>資產</th>
+<th>Rolling Beta</th>
+</tr>
+</thead>
 
-          <tr>
-            <td>SGOV</td>
-            <td>19%</td>
-            <td>20%</td>
-            <td>19%</td>
-          </tr>
+<tbody>
 
-        </tbody>
+<tr>
+<td>QLD</td>
+<td>Loading...</td>
+</tr>
 
-      </table>
+<tr>
+<td>TLT</td>
+<td>Loading...</td>
+</tr>
 
-    </div>
+<tr>
+<td>GLD</td>
+<td>Loading...</td>
+</tr>
 
-    <!-- Tactical Overlay -->
-    <div class="card">
+<tr>
+<td>UUP</td>
+<td>Loading...</td>
+</tr>
 
-      <h2>戰術 Overlay 引擎</h2>
+<tr>
+<td>SGOV</td>
+<td>Loading...</td>
+</tr>
 
-      <table>
+</tbody>
 
-        <thead>
+</table>
 
-          <tr>
-            <th>觸發條件</th>
-            <th>動作</th>
-          </tr>
+</div>
 
-        </thead>
+<!-- Overlay -->
+<div class="card">
 
-        <tbody>
+<h2>戰術 Overlay</h2>
 
-          <tr>
-            <td>QQQ &lt; MA200 × 0.97</td>
-            <td class="red">QLD = 0%</td>
-          </tr>
+<div class="metric">
+<span class="label">QQQ &lt; MA200 × 0.97</span>
+<span class="value red">QLD 全面出場</span>
+</div>
 
-          <tr>
-            <td>SPX 回撤 -10%</td>
-            <td class="green">+5% QLD</td>
-          </tr>
+<div class="metric">
+<span class="label">SPX -10%</span>
+<span class="value green">+5% QLD</span>
+</div>
 
-          <tr>
-            <td>SPX 回撤 -19%</td>
-            <td class="green">+10% QLD</td>
-          </tr>
+<div class="metric">
+<span class="label">SPX -19%</span>
+<span class="value green">+10% QLD</span>
+</div>
 
-          <tr>
-            <td>SPX 回撤 -30%</td>
-            <td class="green">+15% QLD</td>
-          </tr>
+<div class="metric">
+<span class="label">SPX -30%</span>
+<span class="value green">+15% QLD</span>
+</div>
 
-        </tbody>
+</div>
 
-      </table>
+</div>
 
-    </div>
+<div class="footer">
 
-    <!-- Rolling Beta -->
-    <div class="card">
+Pure Alpha 多資產戰情室 V3
 
-      <h2>Rolling Beta 監控系統</h2>
-
-      <div style="margin-bottom:20px;">
-
-        Beta 對標：
-
-        <select id="benchmark-select">
-          <option value="QQQ">QQQ</option>
-          <option value="SPY">SPY</option>
-        </select>
-
-        &nbsp;&nbsp;&nbsp;
-
-        計算週期：
-
-        <select id="window-select">
-          <option value="21">21D</option>
-          <option value="63">63D</option>
-          <option value="126">126D</option>
-        </select>
-
-      </div>
-
-      <table id="beta-table">
-
-        <thead>
-
-          <tr>
-            <th>資產</th>
-            <th>Rolling Beta</th>
-          </tr>
-
-        </thead>
-
-        <tbody>
-
-          <tr>
-            <td>QLD</td>
-            <td class="loading">Loading...</td>
-          </tr>
-
-          <tr>
-            <td>TLT</td>
-            <td class="loading">Loading...</td>
-          </tr>
-
-          <tr>
-            <td>GLD</td>
-            <td class="loading">Loading...</td>
-          </tr>
-
-          <tr>
-            <td>UUP</td>
-            <td class="loading">Loading...</td>
-          </tr>
-
-          <tr>
-            <td>SGOV</td>
-            <td class="loading">Loading...</td>
-          </tr>
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-    <!-- Risk Engine -->
-    <div class="card">
-
-      <h2>風險控制引擎</h2>
-
-      <div class="metric">
-        <span class="label">投資組合波動率</span>
-        <span class="value yellow">18.2%</span>
-      </div>
-
-      <div class="metric">
-        <span class="label">Rolling Beta</span>
-        <span class="value">0.92</span>
-      </div>
-
-      <div class="metric">
-        <span class="label">最大回撤</span>
-        <span class="value red">-34%</span>
-      </div>
-
-      <div class="metric">
-        <span class="label">目標 CAGR</span>
-        <span class="value green">15~20%</span>
-      </div>
-
-      <div class="metric">
-        <span class="label">檢查頻率</span>
-        <span class="value">每週一次</span>
-      </div>
-
-    </div>
-
-  </div>
-
-  <div class="footer">
-
-    Pure Alpha 多資產戰情室 V3<br><br>
-
-    Regime 多資產動態配置戰情室
-
-  </div>
+</div>
 
 </div>
 
 <script>
 
-const API_KEY = "YOUR_TWELVE_DATA_KEY";
+const API_KEY = "b286e5ff15bc4cf8a2eb07d873e3ed3a";
 
 const assets = ["QLD","TLT","GLD","UUP","SGOV"];
 
 let benchmark = "QQQ";
 let windowSize = 21;
 
-// 抓歷史價格
+// API 抓資料
 async function fetchPrices(symbol){
 
-  try{
+  const url =
+  `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=200&apikey=${API_KEY}`;
 
-    const url =
-    `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=200&apikey=${API_KEY}`;
+  const response = await fetch(url);
 
-    const response = await fetch(url);
+  const data = await response.json();
 
-    const data = await response.json();
+  if(!data.values){
 
-    if(!data.values){
-
-      console.log(symbol, data);
-
-      return [];
-
-    }
-
-    return data.values
-      .reverse()
-      .map(v => parseFloat(v.close));
-
-  }catch(error){
-
-    console.error(error);
+    console.log(symbol,data);
 
     return [];
 
   }
 
+  // 關鍵修正：舊→新
+  return data.values
+    .map(v => parseFloat(v.close))
+    .reverse();
+
 }
 
-// Daily Returns
+// Return
 function calcReturns(prices){
 
   let returns = [];
 
   for(let i=1;i<prices.length;i++){
 
-    const ret =
-      (prices[i]-prices[i-1]) / prices[i-1];
-
-    returns.push(ret);
+    returns.push(
+      (prices[i]-prices[i-1]) / prices[i-1]
+    );
 
   }
 
@@ -532,44 +376,34 @@ function calcReturns(prices){
 
 }
 
-// 平均
+// Mean
 function mean(arr){
 
-  if(arr.length === 0) return 0;
-
-  return arr.reduce((a,b)=>a+b,0) / arr.length;
+  return arr.reduce((a,b)=>a+b,0)/arr.length;
 
 }
 
-// 共變異數
+// Covariance
 function covariance(a,b){
 
-  const len = Math.min(a.length,b.length);
-
-  if(len === 0) return 0;
-
-  const aa = a.slice(-len);
-  const bb = b.slice(-len);
-
-  const avgA = mean(aa);
-  const avgB = mean(bb);
+  const avgA = mean(a);
+  const avgB = mean(b);
 
   let sum = 0;
 
-  for(let i=0;i<len;i++){
+  for(let i=0;i<a.length;i++){
 
-    sum += (aa[i]-avgA)*(bb[i]-avgB);
+    sum +=
+    (a[i]-avgA)*(b[i]-avgB);
 
   }
 
-  return sum / len;
+  return sum/a.length;
 
 }
 
-// 變異數
+// Variance
 function variance(arr){
-
-  if(arr.length === 0) return 0;
 
   const avg = mean(arr);
 
@@ -581,7 +415,7 @@ function variance(arr){
 
   }
 
-  return sum / arr.length;
+  return sum/arr.length;
 
 }
 
@@ -594,7 +428,7 @@ function calcBeta(assetReturns, benchmarkReturns){
   const vari =
     variance(benchmarkReturns);
 
-  if(vari === 0 || isNaN(vari)){
+  if(vari === 0){
 
     return 0;
 
@@ -612,51 +446,97 @@ function calcBeta(assetReturns, benchmarkReturns){
 
 }
 
-// 更新 Beta Table
+// 更新 Beta
 async function updateRollingBeta(){
 
-  try{
+  const benchmarkPrices =
+    await fetchPrices(benchmark);
 
-    const tableRows =
-      document.querySelectorAll("#beta-table tbody tr");
+  const benchmarkReturns =
+    calcReturns(benchmarkPrices);
 
-    // benchmark
-    const benchmarkPrices =
-      await fetchPrices(benchmark);
+  const rows =
+    document.querySelectorAll("#beta-table tbody tr");
 
-    const benchmarkReturns =
-      calcReturns(benchmarkPrices).slice(-windowSize);
+  for(let i=0;i<assets.length;i++){
 
-    for(let i=0;i<assets.length;i++){
+    const asset = assets[i];
 
-      const asset = assets[i];
+    const prices =
+      await fetchPrices(asset);
 
-      const prices =
-        await fetchPrices(asset);
+    const returns =
+      calcReturns(prices);
 
-      const returns =
-        calcReturns(prices).slice(-windowSize);
+    const minLen =
+      Math.min(
+        returns.length,
+        benchmarkReturns.length,
+        windowSize
+      );
 
-      const beta =
-        calcBeta(returns, benchmarkReturns);
+    const alignedAsset =
+      returns.slice(-minLen);
 
-      tableRows[i].children[1].innerText =
+    const alignedBenchmark =
+      benchmarkReturns.slice(-minLen);
 
-        isFinite(beta)
-        ? beta.toFixed(2)
-        : "0.00";
+    const beta =
+      calcBeta(
+        alignedAsset,
+        alignedBenchmark
+      );
 
-    }
-
-  }catch(error){
-
-    console.error(error);
+    rows[i].children[1].innerText =
+      beta.toFixed(2);
 
   }
 
 }
 
-// benchmark 切換
+// 更新 MA200
+async function updateMA200(){
+
+  const prices =
+    await fetchPrices("QQQ");
+
+  const current =
+    prices[prices.length-1];
+
+  const ma200 =
+    prices.slice(-200)
+    .reduce((a,b)=>a+b,0)/200;
+
+  document.getElementById("qqq-price")
+    .innerText = current.toFixed(2);
+
+  document.getElementById("qqq-ma200")
+    .innerText = ma200.toFixed(2);
+
+  const bull =
+    current > ma200;
+
+  document.getElementById("qqq-status")
+    .innerText =
+      bull
+      ? "Above MA200"
+      : "Below MA200";
+
+  document.getElementById("qqq-status")
+    .className =
+      bull
+      ? "value green"
+      : "value red";
+
+  document.getElementById("market-regime")
+    .innerText =
+      bull
+      ? "Bull Market"
+      : "Bear Market";
+
+}
+
+// Dropdown
 document
 .getElementById("benchmark-select")
 .addEventListener("change",(e)=>{
@@ -667,12 +547,12 @@ document
 
 });
 
-// 週期切換
 document
 .getElementById("window-select")
 .addEventListener("change",(e)=>{
 
-  windowSize = parseInt(e.target.value);
+  windowSize =
+    parseInt(e.target.value);
 
   updateRollingBeta();
 
@@ -680,6 +560,7 @@ document
 
 // 啟動
 updateRollingBeta();
+updateMA200();
 
 </script>
 
